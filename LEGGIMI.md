@@ -1,10 +1,65 @@
-# La nostra cucina — Ricettario di Lorenzo 2.5.4
+# La nostra cucina — Ricettario, menù, turni e spesa · 2.7.4
+
+by Lollo ®2026 · app web/PWA che funziona anche offline.
+
+## Come si usa (in 10 righe)
+
+1. **Barra in alto**: dice se sei in modalità *Pubblico*, *Operatore* o *Master* e contiene i 4 comandi che valgono ovunque.
+2. **🖨 Stampa** stampa la schermata aperta (ricette, menù del giorno, spesa, turni, fonti, dedica).
+3. **⬇ Esporta** crea PDF, Word o Excel della schermata aperta. In Ricette c'è anche «Scegli quali ricette…»; in Preferite esporta solo le preferite.
+4. **💾 Backup** salva *tutto* in un file .json; «Ripristina da file…» (operatori) rimette solo le parti spuntate e prima salva una copia di sicurezza.
+5. **Accesso operatori**: serve per modificare e per generare i turni; si chiude dopo 15 minuti di inattività.
+6. **⚙ Impostazioni** → *App*: installa o aggiorna l'app. Da file locale (D:/…) apre la versione online e porta con sé i dati.
+7. **⚙ Impostazioni** → *Aspetto*: tema e colori. → *Dati*: importa ricette o i turni della vecchia app. → *Assistente AI*: chiavi.
+8. I dati restano **solo nel browser** del dispositivo: fai un 💾 Backup ogni settimana (dopo 7 giorni compare un avviso).
+9. Spesa comunità: spunta i prodotti o scrivi le quantità; il menu «Selezione ▾» seleziona tutto, niente, inverte o solo quelli con quantità.
+10. «Ricomincia la giornata da zero» (Spesa comunità) cancella solo la giornata aperta.
+
+## Manutenzione (per Lorenzo)
+
+- Dopo ogni modifica a `turni.html` lancia `python strumenti/aggiorna-turni-doc.py`, poi ripubblica. Se ti dimentichi, da master compare un avviso.
+- Pubblica lo ZIP con Pubblica: `index.html`, `sw.js` e `manifest.webmanifest` stanno alla radice.
+
+## 2.7.4 — Spesa comunità: gestione completa delle voci
+
+- **Aggiungi al volo**: riga in cima all'elenco (nome, quantità, supermercato, Invio). Vale solo per la giornata aperta, la voce è già spuntata ed esce in stampa nel reparto «Aggiunti a mano».
+- **Aggiungi un prodotto** (pannello a destra): con la spunta «lista fissa» il prodotto resta anche nei giorni seguenti.
+- **Modifica · Duplica · Elimina**: tocca il nome o ✎. Senza spunta valgono solo per oggi; con «Applica anche alla lista fissa» valgono anche per le prossime giornate.
+- **Lista fissa**: ogni nuova giornata parte da lì; «Ripristina la lista fissa originale» torna ai 110 prodotti di Drive.
+- **ALTRO**: testo libero, stampato in un riquadro in fondo.
+- Stampa: al massimo 2 pagine A4 (il carattere scende fino a 9 pt solo se serve).
+
+## 2.7.3 — stampa ricette e spesa nello stesso stile
+
+- Ricette: la stampa di una ricetta (dal dettaglio, «Stampa / PDF») e del ricettario usa lo stile dei PDF: titolo verde, sezioni (Ingredienti, Preparazione…) in grassetto, elenchi puntati, foto della ricetta se presente, piè di pagina.
+- Spesa comunità: titoli verdi, piè di pagina, reparti che possono continuare nella colonna successiva (niente colonne mezze vuote).
+
+## 2.7.1 — turni e menù su un solo A4
+
+- Turni del mese (stampa, PDF, Word): sempre su un A4, fino a 31 giorni; sabati e domeniche in grassetto con sfondo verde chiaro, festivi in grassetto con sfondo rosato, senza scrivere il nome della festa (festivi riconosciuti: Capodanno, Epifania, Pasqua e Pasquetta calcolate, 25 aprile, 1° maggio, 2 giugno, Ferragosto, San Francesco 4 ottobre dal 2026, Ognissanti, Immacolata, Natale, Santo Stefano).
+- Calendario menù: «🖨 Stampa» offre «Menù del giorno» o «Calendario del mese (A4)»; «⬇ Esporta» PDF e Word danno il calendario del mese su un A4 orizzontale con portate e turni di ogni giorno. L'Excel resta con i fogli Giorni e Ingredienti.
+
+## 2.7.0 — pulizia e stampe professionali
+
+- Tolti i doppioni: stampa ed export solo nella barra; un solo «Modifica menù del giorno»; via «Esporta backup», «Backup completo» e «Importa ricette» dalla barra laterale (stanno in barra e in Impostazioni).
+- Tolti i pulsanti senza più senso: «Importa» del menù e «Importa archivio» della spesa (ora c'è il backup totale con ripristino a scelta).
+- Nomi più chiari: «Colori predefiniti», «Ricomincia la giornata da zero», «Usa la risposta incollata», «Copia negli appunti».
+- Impostazioni riordinate in App · Aspetto · Dati · Assistente AI. «Scarica copia dei dati bloccati» compare solo se ci sono davvero dati illeggibili.
+- Menu laterale riordinato per argomento; «Stampa ed esporta» non è più una voce (si apre da Esporta → «Scegli quali ricette…»).
+- Turni da operatore: nascosta la testata del generatore (versione, Config, Contatti…), resta «? Aiuto turni».
+- PDF nuovi: margini, titoli colorati, caselle ☐ disegnate, tabelle con righe alternate, piè di pagina «La nostra cucina · by Lollo ®2026 · Pagina x di y». Le tabelle Markdown delle ricette diventano righe leggibili, le emoji non diventano più «?».
+- Stampe uniformi: Spesa AI, menù del giorno, turni del mese, fonti e dedica hanno lo stesso stile dei PDF. Word con tabelle vere per i turni.
+
+## Storia delle versioni precedenti
+
+Le descrizioni qui sotto sono storiche e possono citare pulsanti che non esistono più.
+
 
 22 schede ricavate da tutti i 23 file della cartella Google Drive “Ricette”, letti il 31 ottobre 2026. Introduzione e dedica sono riunite in una pagina dedicata e restano consultabili anche in “Fonti e storia”. I testi estratti delle 23 fonti sono conservati integralmente in recipes.json e data.js.
 
 ## Uso
 
-Apri il sito, oppure il file autonomo La_nostra_cucina_v2.5.4.html. Lo ZIP contiene il progetto HTML/PWA completo: estrailo e pubblicalo con il tuo programma Pubblica. I file index.html, sw.js e manifest.webmanifest devono trovarsi alla radice del repository.
+Apri il sito, oppure il file autonomo La_nostra_cucina_v2.6.3.html. Lo ZIP contiene il progetto HTML/PWA completo: estrailo e pubblicalo con il tuo programma Pubblica. I file index.html, sw.js e manifest.webmanifest devono trovarsi alla radice del repository.
 
 Ricerca per titolo, ingrediente e contenuto; filtri per categoria, preferiti e schede da verificare; inserimento, modifica, duplicazione ed eliminazione con annullamento. La sezione “Introduzione e dedica” conserva entrambi i testi originali. Sono disponibili tema chiaro, scuro o di sistema, cinque palette e quattro colori personalizzabili.
 
@@ -176,6 +231,38 @@ I testi provengono dagli stessi documenti editoriali già inclusi nel progetto e
 Nella Spesa comunità ogni prodotto può avere una quantità e un'unità separata: Pezzi (pz), Grammi (gr), Litri (lt), Confezioni (conf), Altro oppure nessuna unità. L'unità è disponibile nell'elenco, quando si aggiunge o modifica un prodotto, nella stampa A4 e nel CSV. Le giornate già salvate restano compatibili e mantengono quantità, prodotti e selezioni.
 
 Ricette, turni, calendario e spesa hanno colori differenti nel menù e nelle rispettive sezioni. I colori sono leggibili sia nel tema chiaro sia in quello scuro e convivono con la palette personale scelta nelle impostazioni.
+
+## 2.6.3 — Backup automatico e trasferimento dati verso il sito
+
+«🌐 Salva backup e apri online» (da file locale): scarica da solo il backup, apre il sito e gli invia i dati; sul sito compare la richiesta di importazione (serve accesso operatore/master), poi si apre Config per installare. Se la richiesta non compare: 💾 Backup → Ripristina da file… col file scaricato.
+
+## 2.6.2 — Da file locale, pulsante «Apri online e installa»
+
+Aprendo l'app da disco (file://) il pulsante in Config diventa «🌐 Apri online e installa»: apre il sito pubblicato (https://baudinolorenzo73.github.io/Cucina_comunita/, modificabile con «Cambia indirizzo»), dove la finestra Config si apre da sola per installare. Con «Salva prima il backup» si scarica il backup da portare online.
+
+## 2.6.1 — Installa / aggiorna app
+
+In Config un solo pulsante «📲 Installa / aggiorna app» (diventa «🔄 Aggiorna app» quando l'app è già installata): controlla se c'è una nuova versione e la applica riavviando l'app; se non è installata avvia l'installazione (Windows, Android, Chrome/Edge) o mostra i passi esatti (iPhone/iPad, Mac, Firefox). «Ripara app» cancella solo la copia offline, non i dati. Serve l'indirizzo https del sito (non il file da disco).
+
+## 2.6.0 — Backup totale fisso, esportazioni uniformi
+
+- Barra della modalità: **🖨 Stampa**, **⬇ Esporta** e **💾 Backup** sempre presenti.
+- Esporta dà sempre PDF, Word ed Excel (ricette, Spesa AI, Spesa comunità, Calendario menù del mese, Turni). CSV, TXT e JSON non sono più nei menu.
+- Backup: «Salva backup completo» (tutti) e «Ripristina da file…» (operatore/master) con spunte per scegliere cosa ripristinare; prima del ripristino viene scaricata una copia di sicurezza. Accanto al pulsante si vede da quanto tempo non salvi; dopo 7 giorni compare un avviso.
+
+## 2.5.7 — Stampa ed Esporta nella barra
+
+Nella barra della modalità (pubblico/operatore/master) ci sono i pulsanti «Stampa» e «Esporta»: agiscono sulla schermata aperta (ricette, Spesa AI, Spesa comunità, Calendario menù, Turni, Fonti, Dedica). Esporta apre un piccolo elenco di formati.
+
+## 2.5.6 — modalità visibile e turni da file locale
+
+- Barra fissa colorata: grigio-blu «MODALITÀ PUBBLICO», verde «MODALITÀ OPERATORE», oro «MODALITÀ MASTER».
+- Aprendo index.html da file locale (D:/…) la gestione turni restava vuota perché Chrome blocca l'iframe: ora i turni sono incorporati in turni-doc.js (da rigenerare da turni.html a ogni modifica).
+
+## 2.5.5 — stampa spesa e turni su smartphone
+
+- Stampa Spesa comunità: A4 verticale, 2 colonne, carattere 10–12 pt (prima 6–9 pt), più pagine se serve.
+- Turni con accesso master/operatore su smartphone: calendario scorrevole, celle leggibili, box menù nascosti nella griglia.
 
 ## 2.5.4 — foto ricette e selezione rapida della spesa
 

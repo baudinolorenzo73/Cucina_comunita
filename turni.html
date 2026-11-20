@@ -240,7 +240,15 @@
   }
 </style>
 <style id="stilePaginaStampa"></style>
-<style>body>header{position:static}#btnInstallaApp,#btnScaricaPortatile,#btnControllaAggiornamenti{display:none!important}.menu-collegato{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:11px}.menu-collegato button{font-size:11px;white-space:normal}@media print{.menu-collegato{display:none}}</style>
+<style id="stileIncorporato">
+/* v2.7.4 — Dentro «La nostra cucina» la testata del generatore è nascosta: resta solo «Aiuto turni». */
+html.incorporato header{padding:6px 10px;min-height:0;background:none;border:0;box-shadow:none}
+html.incorporato header .header-main{display:flex;justify-content:flex-end}
+html.incorporato header .header-main>div:first-child,html.incorporato #btnInstallaApp,html.incorporato #btnScaricaPortatile,html.incorporato #btnControllaAggiornamenti,html.incorporato #btnConfig,html.incorporato #btnContatti,html.incorporato footer{display:none!important}
+</style>
+<script>if(window.parent!==window)document.documentElement.classList.add('incorporato');</script>
+
+<style>body>header{position:static}#btnInstallaApp,#btnScaricaPortatile,#btnControllaAggiornamenti{display:none!important}.menu-collegato{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:11px}@media(max-width:700px){table.cal td .menu-collegato{display:none}table.cal{min-width:620px}table.cal td{height:auto;min-height:60px}select.cella-turno,select.cella-aff{max-width:none}}.menu-collegato button{font-size:11px;white-space:normal}@media print{.menu-collegato{display:none}}</style>
 <style>
 @media print{
  #areaStampa{color:#111;background:#fff;--ink:#111;--muted:#555}
@@ -274,7 +282,7 @@
       <button class="btn mini secondary" id="btnScaricaPortatile">⇩ Scarica HTML</button>
       <button class="btn mini secondary" id="btnControllaAggiornamenti">↻ Aggiornamenti</button>
       <button class="btn mini secondary" id="btnConfig">⚙ Config</button>
-      <button class="btn mini secondary" id="btnAiuto">? Aiuto</button>
+      <button class="btn mini secondary" id="btnAiuto">? Aiuto turni</button>
       <button class="btn mini secondary" id="btnContatti">✉ Contatti</button>
     </div>
     <div id="msgAzioniApp" role="status" aria-live="polite"></div>
@@ -465,7 +473,7 @@
       <button class="btn mini secondary" id="btnRedo" disabled>Ripristina modifica</button>
     </div>
     <div style="margin-top:14px;overflow-x:auto">
-      <table class="cal" id="calGrid"></table>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="cal" id="calGrid"></table></div>
     </div>
   </section>
 
@@ -563,7 +571,7 @@ if(window===parent||!parent.CucinaAccess?.canEdit()){
 const MESI = ["","Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio",
   "Agosto","Settembre","Ottobre","Novembre","Dicembre"];
 const GIORNI_SETT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
-const APP_VERSION = "2.5.4";
+const APP_VERSION = "2.7.4";
 const APP_BUILD = "2026-11-06";
 const PERSONE_INIZIALI = [
   "ANA", "VALERIO", "ROBI", "MONICA", "ELENA", "DARIO", "BRIAN",

@@ -3,13 +3,24 @@ window.RecipeExports=(()=>{
   let api,selected=new Set();const $=id=>document.getElementById(id),enc=new TextEncoder();
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const xml=s=>String(s??'').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
-  const clean=s=>String(s??'').replace(/\r/g,'').replace(/^\s*#{1,6}\s*/gm,'').replace(/\*\*/g,'').trim();
+  const clean=s=>String(s??'').replace(/\r/g,'').replace(/^\s*#{1,6}\s*/gm,'').replace(/\*\*/g,'').replace(/^\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*$/gm,'').replace(/^\s*\|(.+)\|\s*$/gm,(m,c)=>c.split('|').map(x=>x.trim()).filter(Boolean).join(' · ')).replace(/^\s*[-*_]{3,}\s*$/gm,'').trim();
   function ingredients(r){const lines=clean(r.content).split('\n'),start=lines.findIndex(l=>/^\s*ingredient/i.test(l)),stopRe=/^\s*(preparazione(?: dell.impasto)?|procedimento(?: passo per passo)?|metodo|istruzioni|cottura|timeline|mondatura e pulizia|come gestire|perch[eé] queste quantit[aà]|tempi di cottura)\b/i;let part=start>=0?lines.slice(start+1):lines.slice();if(start>=0&&/^\s*procedimento\s*$/i.test(part[0]||''))part=part.slice(1);const stop=part.findIndex(l=>stopRe.test(l));if(stop>=0)part=part.slice(0,stop);part=part.map(l=>l.trim().replace(/^[-*•▪]\s*/, '').replace(/^\|?|\|?$/g,'').trim()).filter(l=>l&&!/^[-:|\s]+$/.test(l)&&!/^ingredient/i.test(l));if(start<0)part=part.filter((l,i)=>/\d|q\.?b\.?|gramm|lit|ml\b|kg\b|farina|acqua|olio|sale|uov|burro|lievito|zucchero/i.test(l)&&i<120);return part.slice(0,300)}
   function recipes(){const all=api.getRecipes();return all.filter(r=>selected.has(r.id))}
   function status(t,error=false){$('exportStatus').textContent=t;$('exportStatus').classList.toggle('error',error)}
   function render(){const q=($('exportSearch').value||'').toLowerCase(),all=api.getRecipes().slice().sort((a,b)=>a.title.localeCompare(b.title,'it'));$('exportRecipes').innerHTML=all.filter(r=>!q||(`${r.title} ${r.category}`).toLowerCase().includes(q)).map(r=>`<label class="check-option"><input type="checkbox" data-export-recipe="${esc(r.id)}" ${selected.has(r.id)?'checked':''}><span>${esc(r.title)}<small>${esc(r.category)} · ${ingredients(r).length} righe ingredienti</small></span></label>`).join('');$('exportSelection').textContent=selected.size===all.length?'Tutte le '+all.length:selected.size+' di '+all.length}
   function ensure(){const r=recipes();if(!r.length)throw Error('Seleziona almeno una ricetta.');return r}
-  function printHTML(r=ensure()){const sources=$('exportSources').checked;return `<div class="print-cover"><h1>La nostra cucina · Ricettario</h1><p>${r.length} ricette · ${new Date().toLocaleDateString('it-IT')}</p></div>`+r.map(x=>`<article class="print-recipe"><h2>${esc(x.title)}</h2><p class="print-meta">${esc(x.category)}${x.servings?' · '+x.servings+' persone':''}</p><pre>${esc(clean(x.content))}</pre>${sources&&x.notes?`<p><strong>Note:</strong> ${esc(x.notes)}</p>`:''}${sources?`<p class="print-sources">Fonte: ${esc(x.origin||'Archivio personale')}${x.sourceUrl?' · '+esc(x.sourceUrl):''}</p>`:''}</article>`).join('')}
+  function bodyHTML(text){
+    const HEAD=/^(ingredienti|preparazione|procedimento|cottura|note|consigli|varianti|conservazione|timeline|finitura|risultato|impasto|condimento|farcitura|dosi|trucchi|tempi|porzioni|attrezzatura)\b/i;let out='',list=false;
+    for(const raw of clean(text).split('\n')){const l=raw.trim();
+      if(!l){if(list){out+='</ul>';list=false}continue}
+      const bullet=l.match(/^[-•*▪]\s+(.*)$/);
+      if(bullet){if(!list){out+='<ul>';list=true}out+='<li>'+esc(bullet[1])+'</li>';continue}
+      if(list){out+='</ul>';list=false}
+      out+=(HEAD.test(l)&&l.length<60?'<h3>'+esc(l.replace(/:$/,''))+'</h3>':'<p>'+esc(l)+'</p>');
+    }
+    return out+(list?'</ul>':'');
+  }
+  function printHTML(r=ensure()){const sources=$('exportSources')?.checked??true,one=r.length===1;return `<div class="recipe-print${one?' single':''}"><header><h1>${one?esc(r[0].title):'La nostra cucina · Ricettario'}</h1><p>${one?esc(r[0].category)+(r[0].servings?' · '+r[0].servings+' persone':''):r.length+' ricette'} · stampato il ${new Date().toLocaleDateString('it-IT')}</p></header>`+r.map(x=>`<article class="print-recipe">${one?'':`<h2>${esc(x.title)}</h2><p class="print-meta">${esc(x.category)}${x.servings?' · '+x.servings+' persone':''}</p>`}${x.photo&&one?`<img class="print-photo" src="${esc(x.photo)}" alt="">`:''}<div class="print-body">${bodyHTML(x.content)}</div>${sources&&x.notes?`<p class="print-notes"><strong>Note:</strong> ${esc(x.notes)}</p>`:''}${sources?`<p class="print-sources">Fonte: ${esc(x.origin||'Archivio personale')}${x.sourceUrl?' · '+esc(x.sourceUrl):''}</p>`:''}</article>`).join('')+'<footer>La nostra cucina · by Lollo ®2026</footer></div>'}
   const crcTable=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?0xedb88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
   function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return(c^0xffffffff)>>>0}
   const u16=n=>new Uint8Array([n&255,(n>>>8)&255]),u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
@@ -22,41 +33,81 @@ window.RecipeExports=(()=>{
   function cp(s){const map={'€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,'‡':135,'ˆ':136,'‰':137,'Š':138,'‹':139,'Œ':140,'Ž':142,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,'™':153,'š':154,'›':155,'œ':156,'ž':158,'Ÿ':159};return new Uint8Array([...String(s)].map(c=>map[c]??(c.charCodeAt(0)<=255?c.charCodeAt(0):63)))}
   const PDF_WIDTHS=[[556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],[556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]];
   function pdf(r){
-    const lines=[{t:'La nostra cucina · Ricettario',b:1,s:14,after:3},{t:r.length+' ricette · '+new Date().toLocaleDateString('it-IT'),s:9,after:7}];
-    r.forEach(x=>{
-      lines.push({gap:7},{t:x.title,b:1,s:12,keep:55,after:2},{t:x.category+(x.servings?' · '+x.servings+' persone':''),s:9,after:3});
-      clean(x.content).replace(/\n[ \t]*\n(?:[ \t]*\n)+/g,'\n\n').split('\n').forEach(t=>lines.push(t.trim()?{t,s:10}:{gap:3}));
-      if($('exportSources').checked&&x.notes)lines.push({t:'Note: '+x.notes,s:9,after:2});
-      if($('exportSources').checked)lines.push({t:'Fonte: '+(x.origin||'Archivio personale')+(x.sourceUrl?' · '+x.sourceUrl:''),s:8.5,after:2});
+    const lines=[{t:'La nostra cucina · Ricettario',b:1,s:20,color:[0.137,0.518,0.373],after:2},{t:r.length+(r.length===1?' ricetta':' ricette')+' · '+new Date().toLocaleDateString('it-IT'),s:9.5,color:[0.42,0.42,0.42],rule:true,after:6}];
+    r.forEach((x,k)=>{
+      lines.push({gap:k?14:4},{t:x.title,b:1,s:14,keep:80,color:[0.137,0.518,0.373],after:1},{t:x.category+(x.servings?' · '+x.servings+' persone':''),s:9,color:[0.42,0.42,0.42],rule:[0.78,0.78,0.78],ruleW:0.6,after:4});
+      clean(x.content).replace(/\n[ \t]*\n(?:[ \t]*\n)+/g,'\n\n').split('\n').forEach(t=>{const v=t.trim();if(!v){lines.push({gap:4});return}const head=/^(ingredienti|preparazione|procedimento|cottura|note|consigli|varianti|conservazione|timeline|finitura|risultato|impasto|condimento|farcitura|dosi|trucchi|tempi|porzioni|attrezzatura)\b/i.test(v)&&v.length<60;lines.push(head?{t:v,b:1,s:10.5,keep:40,after:1}:{t:v,s:10})});
+      if($('exportSources').checked&&x.notes)lines.push({t:'Note: '+x.notes,s:9,b:2,color:[0.3,0.3,0.3],after:2});
+      if($('exportSources').checked)lines.push({t:'Fonte: '+(x.origin||'Archivio personale')+(x.sourceUrl?' · '+x.sourceUrl:''),s:8.5,color:[0.42,0.42,0.42],after:2});
     });
-    const pages=[];let cur=[],y=818;
-    const width=(t,size,b)=>[...cp(t)].reduce((sum,c)=>sum+PDF_WIDTHS[b?1:0][c],0)*size/1000;
-    const wrap=(text,size,b)=>{
-      const out=[];let line='';
-      for(const word of String(text).split(/\s+/)){
-        const test=line?line+' '+word:word;
-        if(width(test,size,b)<=551){line=test;continue}
-        if(line){out.push(line);line=''}
-        for(const c of word){if(width(line+c,size,b)>551&&line){out.push(line);line=''}line+=c}
-      }
-      if(line)out.push(line);return out;
-    };
-    const nextPage=()=>{if(cur.length)pages.push(cur);cur=[];y=818};
-    for(const line of lines){
-      if(line.gap){y-=line.gap;continue}
-      if(line.keep&&y-line.keep<30)nextPage();
-      for(const t of wrap(line.t,line.s,!!line.b)){
-        if(y-line.s<30)nextPage();
-        cur.push({...line,t,y});y-=line.s*1.18;
-      }
-      y-=line.after||0;
+    return pdfFromLines(lines,{title:'Ricettario'});
+  }
+  const PDFK={
+    ACC:[0.137,0.518,0.373],INK:[0.12,0.12,0.12],GREY:[0.42,0.42,0.42],LINE:[0.78,0.78,0.78],
+    SUB:{'→':'->','←':'<-','⇒':'=>','≈':'~','≤':'<=','≥':'>=','✓':'v','✔':'v','✗':'x','☐':'','☑':'','−':'-','′':"'",'″':'"',' ':' ',' ':' '},
+    norm(t){return String(t??'').replace(/[←-⯿✀-➿️‍]|[\ud800-\udfff]./g,c=>PDFK.SUB[c]??'').replace(/[^\x00-\xff€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—™š›œžŸ]/g,c=>PDFK.SUB[c]??'').replace(/[ \t]{2,}/g,' ')},
+    width(t,size,b){return [...cp(t)].reduce((sum,c)=>sum+(PDF_WIDTHS[b===1?1:0][c]||556),0)*size/1000},
+    wrap(text,size,b,max){const out=[];let line='';for(const word of String(text).split(/\s+/)){if(!word)continue;const test=line?line+' '+word:word;if(PDFK.width(test,size,b)<=max){line=test;continue}if(line){out.push(line);line=''}for(const c of word){if(PDFK.width(line+c,size,b)>max&&line){out.push(line);line=''}line+=c}}if(line)out.push(line);return out.length?out:['']},
+    rgb(c){return c.map(v=>v.toFixed(3)).join(' ')},
+    text(t,x,y,s,b,c){return `BT /F${b===2?3:b?2:1} ${s} Tf ${PDFK.rgb(c||PDFK.INK)} rg ${x.toFixed(1)} ${y.toFixed(1)} Td (${String(t).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')}) Tj ET`},
+    rule(y,c,w,x1,x2){return `${PDFK.rgb(c||PDFK.LINE)} RG ${w||0.6} w ${x1} ${y.toFixed(1)} m ${x2} ${y.toFixed(1)} l S`},
+    vline(x,y1,y2,c,w){return `${PDFK.rgb(c||PDFK.LINE)} RG ${w||0.6} w ${x.toFixed(1)} ${y1.toFixed(1)} m ${x.toFixed(1)} ${y2.toFixed(1)} l S`},
+    rect(x,y,w,h,c){return `${PDFK.rgb(c)} rg ${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)} re f`},
+    frame(x,y,w,h,c,lw){return `${PDFK.rgb(c||PDFK.LINE)} RG ${lw||0.6} w ${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)} re S`},
+    box(x,y,s){return `${PDFK.rgb(PDFK.GREY)} RG 0.7 w ${x} ${(y-1).toFixed(1)} ${(s*0.78).toFixed(1)} ${(s*0.78).toFixed(1)} re S`},
+    footer(pages,W,L,R,title){const n=pages.length,foot='La nostra cucina · by Lollo ®2026'+(title?' · '+PDFK.norm(title):'');pages.forEach((pg,i)=>{const p='Pagina '+(i+1)+' di '+n;pg.push(PDFK.rule(30,PDFK.LINE,0.5,L,R),PDFK.text(PDFK.wrap(foot,7.5,0,R-L-80)[0],L,19,7.5,0,PDFK.GREY),PDFK.text(p,R-PDFK.width(p,7.5,0),19,7.5,0,PDFK.GREY))})},
+    assemble(pages,W=595,H=842){
+      const objects=[];objects[1]=cp('<< /Type /Catalog /Pages 2 0 R >>');
+      objects[3]=cp('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+      objects[4]=cp('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+      objects[5]=cp('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>');
+      const kids=[];
+      pages.forEach((pg,i)=>{const contentId=6+i*2,pageId=7+i*2;kids.push(`${pageId} 0 R`);const bytes=cp(pg.join('\n'));objects[contentId]=join([cp(`<< /Length ${bytes.length} >>\nstream\n`),bytes,cp('\nendstream')]);objects[pageId]=cp(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${contentId} 0 R >>`)});
+      objects[2]=cp(`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`);
+      const parts=[cp('%PDF-1.4\n%âãÏÓ\n')],offsets=[0];
+      for(let i=1;i<objects.length;i++){offsets[i]=parts.reduce((k,p)=>k+p.length,0);parts.push(cp(`${i} 0 obj\n`),objects[i],cp('\nendobj\n'))}
+      const xref=parts.reduce((k,p)=>k+p.length,0);
+      parts.push(cp(`xref\n0 ${objects.length}\n0000000000 65535 f \n`+offsets.slice(1).map(o=>String(o).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`));
+      return join(parts);
     }
-    nextPage();
-    pages.forEach((page,i)=>page.push({t:'Pagina '+(i+1)+' / '+pages.length,s:8,y:18}));
-    const objects=[];objects[1]=cp('<< /Type /Catalog /Pages 2 0 R >>');objects[3]=cp('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');objects[4]=cp('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');const kids=[];pages.forEach((pg,i)=>{const contentId=5+i*2;const pageId=6+i*2;kids.push(`${pageId} 0 R`);const cmd=pg.map(l=>`BT /F${l.b?2:1} ${l.s||9} Tf 22 ${l.y.toFixed(1)} Td (${String(l.t).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')}) Tj ET`).join('\n');const bytes=cp(cmd);objects[contentId]=join([cp(`<< /Length ${bytes.length} >>\nstream\n`),bytes,cp('\nendstream')]);objects[pageId]=cp(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentId} 0 R >>`)});objects[2]=cp(`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`);const parts=[cp('%PDF-1.4\n%âãÏÓ\n')],offsets=[0];for(let i=1;i<objects.length;i++){offsets[i]=parts.reduce((n,p)=>n+p.length,0);parts.push(cp(`${i} 0 obj\n`),objects[i],cp('\nendobj\n'))}const xref=parts.reduce((n,p)=>n+p.length,0);parts.push(cp(`xref\n0 ${objects.length}\n0000000000 65535 f \n`+offsets.slice(1).map(o=>String(o).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`));return join(parts)}
+  };
+  function pdfFromLines(lines,opts={}){
+    /* Impaginazione A4 verticale: margini 36pt, colori, righe, caselle, tabelle, piè di pagina. by Lollo ®2026 */
+    const K=PDFK,L=36,R=559,W=R-L,TOP=800,BOTTOM=46;
+    const pages=[];let cur=[],y=TOP;
+    const nextPage=()=>{pages.push(cur);cur=[];y=TOP-(opts.title?14:0)};
+    for(const raw of lines){
+      if(raw.gap){y-=raw.gap;continue}
+      const s=raw.s||10,lh=s*(raw.lh||1.3);
+      if(raw.keep&&y-raw.keep<BOTTOM)nextPage();
+      if(raw.cols){
+        const x0=L+(raw.box?16:0),cells=raw.cols.map(c=>({...c,lines:K.wrap(K.norm(c.t),s,c.b??raw.b,(c.w||W)-8)}));
+        const rows=Math.max(...cells.map(c=>c.lines.length)),h=rows*lh+(raw.pad??5);
+        if(y-h<BOTTOM)nextPage();
+        if(raw.shade)cur.push(K.rect(L,y-h+lh-3,W,h,raw.shade));
+        if(raw.box)cur.push(K.box(L+2,y,s));
+        let x=x0;for(const c of cells){c.lines.forEach((t,k)=>cur.push(K.text(t,x+(c.right?(c.w-8-K.width(t,s,c.b??raw.b)):0),y-k*lh,s,c.b??raw.b,c.color||raw.color)));x+=c.w||W}
+        if(raw.border!==false)cur.push(K.rule(y-h+lh-3,K.LINE,0.4,L,R));
+        y-=h;continue;
+      }
+      const x=L+(raw.x||0)+(raw.box?16:0),max=R-x;let needBox=!!raw.box;
+      for(const t of K.wrap(K.norm(raw.t),s,raw.b,max)){
+        if(y-s<BOTTOM)nextPage();
+        if(needBox){cur.push(K.box(L+(raw.x||0)+2,y,s));needBox=false}
+        cur.push(K.text(t,x,y,s,raw.b,raw.color));y-=lh;
+      }
+      if(raw.rule){cur.push(K.rule(y+lh-s*1.05-2,raw.rule===true?K.ACC:raw.rule,raw.ruleW||1,L,R));y-=4}
+      y-=raw.after||0;
+    }
+    pages.push(cur);
+    pages.forEach((pg,i)=>{if(opts.title&&i>0)pg.unshift(K.text(K.norm(opts.title),L,818,8,0,K.GREY),K.rule(812,K.LINE,0.5,L,R))});
+    K.footer(pages,595,L,R,opts.title);
+    return K.assemble(pages);
+  }
 
+  function run(kind,list,base){const r=list||ensure();if(!r.length)throw Error(base==='Ricette_preferite'?'Non hai ancora ricette preferite: tocca ♡ su una ricetta.':'Seleziona almeno una ricetta.');if(kind==='print'){api.printHTML(printHTML(r));return 'Anteprima di stampa pronta.'}base=base||'Ricettario_Lorenzo';const M={pdf:['application/pdf',pdf],docx:['application/vnd.openxmlformats-officedocument.wordprocessingml.document',docx],xlsx:['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',xlsx]}[kind];api.download(base+'.'+kind,M[1](r),M[0]);return base+'.'+kind+' creato.'}
   function downloadBytes(name,bytes,type){api.download(name,bytes,type);status(name+' creato correttamente.')}
   function refresh(){const all=api.getRecipes();if(!selected.size)all.forEach(r=>selected.add(r.id));else selected=new Set([...selected].filter(id=>all.some(r=>r.id===id)));render()}
   function init(options){api=options;refresh();$('exportRecipes').onchange=e=>{const id=e.target.dataset.exportRecipe;if(!id)return;e.target.checked?selected.add(id):selected.delete(id);render()};$('exportSearch').oninput=render;$('exportAll').onclick=()=>{api.getRecipes().forEach(r=>selected.add(r.id));render()};$('exportNone').onclick=()=>{selected.clear();render()};$('exportPrint').onclick=()=>{try{api.printHTML(printHTML());status('Anteprima pronta.')}catch(e){status(e.message,true)}};$('exportPdf').onclick=()=>{try{downloadBytes('Ricettario_Lorenzo.pdf',pdf(ensure()),'application/pdf')}catch(e){status('PDF non creato: '+e.message,true)}};$('exportDocx').onclick=()=>{try{downloadBytes('Ricettario_Lorenzo.docx',docx(ensure()),'application/vnd.openxmlformats-officedocument.wordprocessingml.document')}catch(e){status('DOCX non creato: '+e.message,true)}};$('exportXlsx').onclick=()=>{try{downloadBytes('Ricettario_Lorenzo.xlsx',xlsx(ensure()),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}catch(e){status('Excel non creato: '+e.message,true)}}}
-  return{init,refresh,ingredients,build:{docx,xlsx,pdf}};
+  return{init,refresh,ingredients,run,all:()=>api.getRecipes(),favorites:()=>api.getRecipes().filter(r=>r.favorite),build:{docx,xlsx,pdf,pdfFromLines},lib:{zip,xml,sheet,cp,pdf:PDFK}};
 })();
