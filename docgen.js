@@ -114,6 +114,15 @@ window.DocGen=(()=>{
   return L().zip({'[Content_Types].xml':'<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>','_rels/.rels':'<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>','word/document.xml':body});
  }
  function printCalendar(cal){$('printContent').innerHTML=calendarHtml(cal);let st=$('pageLandscape');if(!st){st=document.createElement('style');st.id='pageLandscape';st.textContent='@media print{@page{size:A4 landscape;margin:8mm}}';document.head.append(st)}$('printDialog').addEventListener('close',()=>$('pageLandscape')?.remove(),{once:true});$('printDialog').showModal()}
+ /* Condivisione: testo leggibile su WhatsApp (*grassetto*), poi Condividi del telefono o WhatsApp Web. */
+ function shareText(data){const doc=data.doc;let t='*'+doc.title+'*'+(doc.subtitle?'\n'+doc.subtitle:'');
+  for(const sec of doc.sections){if(sec.heading)t+='\n\n*'+sec.heading.toUpperCase()+'*';for(const raw of sec.items||[]){const x=item(raw);t+=x.h?'\n_'+x.h+'_':x.k?'\n'+x.k+': '+x.t:'\n'+(x.check?'☐ ':'• ')+x.t+(x.r?' — '+x.r:'')}if(sec.note)t+='\n'+sec.note}
+  return t+'\n\n— La nostra cucina';}
+ async function share(data){const text=shareText(data),title=data.doc.title;
+  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(mobile&&navigator.share){try{await navigator.share({title,text});return}catch(e){if(e.name==='AbortError')return}}
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener');
+ }
  function save(kind,data){
   if(!data)throw Error('Niente da esportare.');
   if(!window.RecipeExports?.lib)throw Error('Esportazione non pronta: ricarica la pagina.');
@@ -121,5 +130,5 @@ window.DocGen=(()=>{
   api.download(data.base+'.'+kind,bytes,MIME[kind]);
   api.toast(data.base+'.'+kind+' creato.');
  }
- return{init:o=>{api=o},pdf,docx,xlsx,html,print,printCalendar,calendarPdf,save};
+ return{init:o=>{api=o},shareText,share,pdf,docx,xlsx,html,print,printCalendar,calendarPdf,save};
 })();

@@ -196,3 +196,103 @@ td.we .cal-day b{color:#23845f}td.fest .cal-day b,.cal-fest{color:#b8331f!import
 .check-line input{width:auto!important;margin-top:3px}
 button.danger{color:#b8331f;border-color:#e3b3a8}
 @media(max-width:740px){.community-quick{grid-template-columns:1fr 1fr}.community-quick input:first-child{grid-column:1/-1}.community-quick button{grid-column:1/-1}}
+/* v2.8.0 — Pubblica turni e I miei turni. */
+.publish-row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.publish-row label{flex:0 1 220px}
+#myTurns h2{margin-top:0}
+.my-turns-row{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-bottom:10px}.my-turns-row label{flex:1 1 220px}
+.my-turns-list{list-style:none;margin:8px 0;padding:0;display:grid;gap:6px}
+.my-turns-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.my-turns-list li.we{font-weight:700}.my-turns-list li.today{border-color:#23845f;box-shadow:0 0 0 2px color-mix(in srgb,#23845f 30%,transparent)}
+.my-turns-list li span:last-child{color:var(--muted);white-space:nowrap}
+/* v2.8.0 — Elenchi puntati nel dettaglio ricetta. */
+.prose .text-line.bullet{position:relative;padding-left:1.2em}
+.prose .text-line.bullet::before{content:"•";position:absolute;left:.2em;color:var(--accent,#23845f);font-weight:700}
+/* v2.8.0 — Barra della modalità compatta su telefono (una sola riga, icone). */
+@media(max-width:740px){
+ .access-bar{flex-wrap:nowrap!important;gap:6px!important;padding:6px 8px!important;border-left-width:6px!important;align-items:center}
+ .access-bar>span:not(.bar-actions){display:none}
+ .access-bar strong{font-size:10.5px;padding:5px 8px;letter-spacing:.3px}
+ .bar-actions{flex:1 1 auto!important;justify-content:flex-end;gap:4px!important}
+ .bar-actions>button{flex:0 0 auto!important;padding:7px 9px;min-height:0;font-size:15px}
+ .bar-actions .lbl,#barBackup small{display:none}
+ #barBackup.warn::after{content:"!";color:#c0392b;font-weight:800;margin-left:2px}
+ #accessOpen,#accessLogout{font-size:0!important;padding:7px 9px!important;min-height:0;flex:0 0 auto}
+ #accessOpen::before{content:"🔑";font-size:15px}
+ #accessLogout::before{content:"↩";font-size:15px;font-weight:700}
+ .bar-menu{left:auto!important;right:0!important;min-width:220px}
+}
+.public-turni-table th:first-child{white-space:nowrap}
+/* v2.8.0 — Spesa comunità su telefono e tablet verticale: ogni voce su due righe, tutto visibile senza scorrere di lato. */
+@media(max-width:900px){
+ .community-head{display:none}
+ .community-row{min-width:0!important;grid-template-columns:30px minmax(0,1.25fr) minmax(0,.75fr) 40px!important;grid-template-areas:"chk name name edit" "chk qty store store";row-gap:6px;column-gap:6px;padding:10px 8px}
+ .community-row>input[type=checkbox]{grid-area:chk;align-self:start;margin-top:4px}
+ .community-row>.community-name{grid-area:name}
+ .community-row>.community-quantity{grid-area:qty;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .community-row>select{grid-area:store;width:100%}
+ .community-row>.community-edit{grid-area:edit;align-self:start}
+ .community-row input,.community-row select{font-size:14px;padding:8px}
+}
+
+/* v2.8.0 — Ottimizzazione per dispositivo.
+   Telefono ≤740 px · Tablet verticale 741–1023 px · Tablet orizzontale / PC piccolo 1024–1279 px · PC ≥1280 px */
+.bar-actions>button{white-space:nowrap}
+.saved-badge{white-space:nowrap}
+@media(max-width:740px){
+ .page-heading{flex-wrap:wrap}
+ .saved-badge{order:3;font-size:10px}
+ .recipe-detail-photo{max-height:220px}
+ dialog{width:calc(100vw - 16px);max-width:none}
+}
+/* Tablet verticale: menu delle sezioni in alto (come sul telefono, ma su due righe), contenuto a tutta larghezza. */
+@media(min-width:741px) and (max-width:1023px){
+ .app-shell{display:block}
+ aside{padding:10px 22px;border-right:0;border-bottom:1px solid var(--line)}
+ .side-label,.sidebar-note,.side-footer{display:none}
+ nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+ nav button{flex:0 0 auto;padding:9px 13px}
+ nav button span{font-size:13px}
+ nav button b{display:none}
+ main{padding:30px 28px}
+ .recipe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .access-bar>span:not(.bar-actions){display:none}
+ #barBackup small{display:none}
+ #barBackup.warn::after{content:"!";color:#c0392b;font-weight:800;margin-left:3px}
+ #settingsDialog,#detailDialog,#editDialog{max-width:92vw}
+}
+/* Tablet orizzontale e PC piccoli: menù e spesa su una colonna, calendario senza scorrimento laterale. */
+@media(max-width:1279px){
+ .menu-layout{grid-template-columns:1fr}
+ .menu-day-detail{position:static}
+ #menuCalendar{grid-template-columns:repeat(7,minmax(0,1fr));overflow:visible}
+ .community-layout{grid-template-columns:1fr}
+ .community-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start}
+}
+@media(min-width:741px) and (max-width:1279px){
+ .access-bar strong{white-space:nowrap}
+}
+/* PC grandi: contenuto più arioso ma con larghezza massima leggibile. */
+@media(min-width:1600px){
+ main{max-width:1500px;width:100%;margin:0 auto}
+}
+.app-shell>main{min-width:0}
+/* v2.8.2 — Aiuto: pulsante generale e pulsantini per sezione. */
+.help-dot,h1 button.help-dot{display:inline-grid;place-items:center;width:26px;height:26px;min-height:0;padding:0;margin-left:10px;border-radius:50%;font:700 14px/1 system-ui,sans-serif;vertical-align:middle;border:1.5px solid var(--accent,#23845f);color:var(--accent,#23845f);background:var(--paper);cursor:pointer;letter-spacing:0}
+h1 button.help-dot:hover,h1 button.help-dot:focus-visible,.help-dot:hover,.help-dot:focus-visible{background:var(--accent,#23845f);color:#fff}
+#helpOpen{font-weight:800;font-size:18px}
+.help-dialog{max-width:620px;width:calc(100vw - 24px)}
+.help-body{font-size:15px;line-height:1.55}
+.help-body h3{margin:16px 0 6px;font-size:17px}
+.help-body ul,.help-body ol{padding-left:20px;margin:6px 0 10px}.help-body li{margin:0 0 6px}
+.help-tip,.help-warn{padding:10px 12px;border-radius:10px;margin:10px 0;font-size:14px}
+.help-tip{background:color-mix(in srgb,#23845f 10%,var(--paper));border-left:4px solid #23845f}
+.help-warn{background:color-mix(in srgb,#c0392b 9%,var(--paper));border-left:4px solid #c0392b}
+.help-links{display:flex;flex-wrap:wrap;gap:6px}.help-links button{font-size:13px;padding:7px 11px}
+.help-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.help-pdf{font-weight:700;color:var(--accent,#23845f)}
+.link-btn{border:0;background:none;padding:0;color:var(--accent,#23845f);font-weight:600;cursor:pointer}
+@media(max-width:740px){.help-dot,h1 button.help-dot{width:22px;height:22px;font-size:12px;margin-left:6px}#helpOpen{font-size:16px}}
+
+/* v2.9.0 — Selezione ricette per stampa ed esportazione. */
+.list-meta{flex-wrap:wrap;gap:8px 14px}.pick-toggle{font-size:12px;padding:6px 12px}.pick-btn{display:none;position:absolute;left:10px;top:10px;z-index:3;width:30px;height:30px;padding:0;border-radius:8px;border:2px solid var(--accent);background:var(--paper);color:var(--paper);font-weight:700;font-size:18px;line-height:1;align-items:center;justify-content:center}.pick-mode .pick-btn{display:inline-flex}.pick-btn.selected{background:var(--accent);color:#fff}.pick-mode .reorder-grip{display:none!important}.recipe-card.is-picked{outline:3px solid var(--accent);outline-offset:-3px}.pick-bar{position:sticky;bottom:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:18px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:var(--shadow)}.pick-bar[hidden]{display:none}.pick-actions{display:flex;flex-wrap:wrap;gap:6px}.pick-actions button{padding:7px 12px;font-size:13px}.pick-actions button:disabled{opacity:.45;cursor:default}@media print{.pick-bar,.pick-btn,.pick-toggle{display:none!important}}
+.pick-mode .recipe-order-hint{display:none}

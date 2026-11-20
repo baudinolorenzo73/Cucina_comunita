@@ -1,24 +1,64 @@
-# La nostra cucina — Ricettario, menù, turni e spesa · 2.7.4
+# La nostra cucina — Ricettario, menù, turni e spesa · 2.9.1
 
 by Lollo ®2026 · app web/PWA che funziona anche offline.
 
-## Come si usa (in 10 righe)
+## Come si usa (in breve)
 
-1. **Barra in alto**: dice se sei in modalità *Pubblico*, *Operatore* o *Master* e contiene i 4 comandi che valgono ovunque.
-2. **🖨 Stampa** stampa la schermata aperta (ricette, menù del giorno, spesa, turni, fonti, dedica).
-3. **⬇ Esporta** crea PDF, Word o Excel della schermata aperta. In Ricette c'è anche «Scegli quali ricette…»; in Preferite esporta solo le preferite.
-4. **💾 Backup** salva *tutto* in un file .json; «Ripristina da file…» (operatori) rimette solo le parti spuntate e prima salva una copia di sicurezza.
+1. **Barra in alto**: dice se sei in modalità *Pubblico* (grigio-blu), *Operatore* (verde) o *Master* (oro) e contiene i comandi che valgono ovunque. Su telefono diventa una riga di icone: 🖨 ⬇ 💾 🔑.
+2. **🖨 Stampa** stampa la schermata aperta: ricette, menù del giorno o calendario del mese, spesa, turni, fonti, dedica.
+3. **⬇ Esporta** crea PDF, Word o Excel della schermata aperta. In Ricette c'è «Scegli quali ricette…», in Preferite escono solo le preferite. Nelle due spese c'è anche **📲 WhatsApp / Condividi**.
+4. **💾 Backup** salva *tutto* in un file .json; «Ripristina da file…» (operatori) rimette solo le parti spuntate e prima scarica una copia di sicurezza. Dopo 7 giorni senza backup compare un avviso.
 5. **Accesso operatori**: serve per modificare e per generare i turni; si chiude dopo 15 minuti di inattività.
-6. **⚙ Impostazioni** → *App*: installa o aggiorna l'app. Da file locale (D:/…) apre la versione online e porta con sé i dati.
-7. **⚙ Impostazioni** → *Aspetto*: tema e colori. → *Dati*: importa ricette o i turni della vecchia app. → *Assistente AI*: chiavi.
-8. I dati restano **solo nel browser** del dispositivo: fai un 💾 Backup ogni settimana (dopo 7 giorni compare un avviso).
-9. Spesa comunità: spunta i prodotti o scrivi le quantità; il menu «Selezione ▾» seleziona tutto, niente, inverte o solo quelli con quantità.
-10. «Ricomincia la giornata da zero» (Spesa comunità) cancella solo la giornata aperta.
+6. **Turni**: tutti vedono i turni pubblicati e, in **👤 I miei turni**, i propri giorni con il pulsante per aggiungerli al calendario del telefono. Gli operatori generano i turni e li pubblicano per tutti.
+7. **Spesa comunità**: «➕ Aggiungi al volo» (solo oggi), «Aggiungi un prodotto» (anche nella lista fissa), ✎ per modificare, duplicare o eliminare, ALTRO per il testo libero, «Selezione ▾» per spuntare in blocco. Stampa su massimo 2 pagine A4.
+8. **⚙ Impostazioni** → *App*: installa o aggiorna l'app (da file locale apre la versione online e porta con sé i dati). → *Aspetto* · *Dati* · *Assistente AI*.
+9. I dati restano **solo nel browser** del dispositivo: il backup è l'unico modo per conservarli o spostarli.
+10. **? Aiuto**: il pulsante ? in alto e il ? accanto a ogni titolo spiegano l'app e ogni sezione; la guida completa con figure è in `docs/Guida-La-nostra-cucina.pdf`.
 
 ## Manutenzione (per Lorenzo)
 
+- **Pubblicare i turni per tutti**: da operatore/master, Turni → «📤 Pubblica i turni per tutti» → scegli il mese → si scarica `turni-pubblicati.js`. Mettilo nella cartella del progetto al posto del vecchio e ripubblica con Pubblica. Il file contiene tutti i mesi pubblicati (ultimi 24).
+
 - Dopo ogni modifica a `turni.html` lancia `python strumenti/aggiorna-turni-doc.py`, poi ripubblica. Se ti dimentichi, da master compare un avviso.
 - Pubblica lo ZIP con Pubblica: `index.html`, `sw.js` e `manifest.webmanifest` stanno alla radice.
+
+## 2.9.1 — Identità dell'app installata
+
+- Il manifest ha ora un `id` proprio (`/Cucina_comunita/`). Prima `./` coincideva con quello di altre app sullo stesso sito github.io (per esempio Pubblica), e Chrome le scambiava: installando una, l'altra spariva.
+
+## 2.9.0 — Selezione delle ricette
+
+- In «Le mie ricette» e «Preferite» il pulsante **☑ Seleziona ricette** mostra una casella su ogni scheda. Una barra in basso permette di scegliere «Tutte quelle visibili» o «Nessuna» e di **stampare** o esportare in **PDF, Word, Excel** solo le ricette scelte (file `Ricette_selezionate`). Anche 🖨 Stampa e ⬇ Esporta in alto usano la selezione, se c'è.
+- Nuovo file `recipe-select.js`.
+
+## 2.8.3 — Pulizia
+
+- Il controllo che avvisa se `turni-doc.js` è vecchio ora gira solo per il master e non scarica più `turni.html` per tutti; `turni.html` non è più nella copia offline.
+- Tolto `recipes.json` (non usato: le ricette sono in `data.js`) e otto note `docs/*.md` minori, già riassunte qui; restano `accessi-v2.4.0.md` e `modifica-menu-v2.3.0.md`.
+
+## 2.8.2 — Aiuto nell'app
+
+- Pulsante **?** in alto a destra (accanto a ⚙): come funziona l'app, modalità, comandi della barra e collegamenti all'aiuto di ogni sezione.
+- Pulsantino **?** accanto al titolo di ogni sezione: spiegazione breve di quella schermata.
+- Ogni aiuto ha **📖 Apri la guida completa**, che apre la guida PDF alla pagina giusta (serve la rete, il PDF non è nella copia offline).
+- Guida PDF aggiornata (39 pagine) con il nuovo paragrafo «L'aiuto dentro l'app».
+- I sorgenti della guida (testi, immagini, script per rifarla) sono in un pacchetto a parte, `guida-sorgenti-v2.8.2.zip`: **non** vanno messi nel progetto pubblicato.
+
+## 2.8.1 — ottimizzata per ogni dispositivo e guida PDF
+
+- **Telefono** (fino a 740 px): barra della modalità su una riga di icone (🖨 ⬇ 💾 🔑, «!» rosso se il backup è vecchio); spesa comunità con ogni voce su due righe; titoli che vanno a capo.
+- **Tablet verticale** (741–1023 px): menu delle sezioni in alto su due righe, contenuto a tutta larghezza, spesa su due righe per voce.
+- **Tablet orizzontale e PC piccoli** (1024–1279 px): calendario menù e spesa su una colonna, senza scorrimento laterale.
+- **PC** (da 1280 px): due colonne dove servono; sugli schermi molto grandi il contenuto resta centrato e leggibile.
+- **Guida all'uso** in PDF: `docs/Guida-La-nostra-cucina.pdf` (39 pagine, con indice, glossario, indice analitico e segnalibri).
+
+## 2.8.0 — turni per tutti, I miei turni, WhatsApp, ricette riordinate
+
+- **Turni condivisi**: nuovo file `turni-pubblicati.js` letto da tutti (anche offline e da file locale). Il pulsante «Pubblica i turni per tutti» lo crea dai turni generati sul dispositivo. Il sito lo ricarica sempre dalla rete, quindi basta ripubblicare quel file.
+- **👤 I miei turni** (pagina Turni, per tutti): scegli il tuo nome, vedi i tuoi turni da oggi a fine mese prossimo (oggi evidenziato, weekend e festivi in grassetto) e «📅 Aggiungi al calendario del telefono» scarica un file .ics con promemoria alle 18 del giorno prima. Riscaricandolo i turni si aggiornano senza doppioni.
+- **📲 WhatsApp**: Spesa comunità («Invia la lista su WhatsApp» nel pannello Giornata) ed Esporta di Spesa comunità e Spesa AI. Sul telefono apre Condividi, sul PC WhatsApp Web.
+- **Telefono**: barra della modalità compatta (una riga di icone) e voci della Spesa comunità su due righe, con quantità, unità, supermercato e ✎ sempre visibili.
+- **Ricette riordinate**: le 22 ricette hanno ora sezioni chiare (Ingredienti, Preparazione, Cottura, Consigli, Note…), elenchi puntati e passaggi numerati. Dosi, tempi e note sono gli stessi. Le ricette che avevi modificato tu non vengono toccate.
 
 ## 2.7.4 — Spesa comunità: gestione completa delle voci
 
@@ -55,7 +95,7 @@ by Lollo ®2026 · app web/PWA che funziona anche offline.
 Le descrizioni qui sotto sono storiche e possono citare pulsanti che non esistono più.
 
 
-22 schede ricavate da tutti i 23 file della cartella Google Drive “Ricette”, letti il 31 ottobre 2026. Introduzione e dedica sono riunite in una pagina dedicata e restano consultabili anche in “Fonti e storia”. I testi estratti delle 23 fonti sono conservati integralmente in recipes.json e data.js.
+22 schede ricavate da tutti i 23 file della cartella Google Drive “Ricette”, letti il 31 ottobre 2026. Introduzione e dedica sono riunite in una pagina dedicata e restano consultabili anche in “Fonti e storia”. I testi estratti delle 23 fonti sono conservati integralmente in data.js.
 
 ## Uso
 

@@ -11,12 +11,12 @@ window.RecipeExports=(()=>{
   function ensure(){const r=recipes();if(!r.length)throw Error('Seleziona almeno una ricetta.');return r}
   function bodyHTML(text){
     const HEAD=/^(ingredienti|preparazione|procedimento|cottura|note|consigli|varianti|conservazione|timeline|finitura|risultato|impasto|condimento|farcitura|dosi|trucchi|tempi|porzioni|attrezzatura)\b/i;let out='',list=false;
-    for(const raw of clean(text).split('\n')){const l=raw.trim();
+    for(const raw of String(text??'').replace(/\r/g,'').split('\n')){const md=/^\s*#{1,6}\s+/.test(raw),l=clean(raw).trim();
       if(!l){if(list){out+='</ul>';list=false}continue}
       const bullet=l.match(/^[-•*▪]\s+(.*)$/);
       if(bullet){if(!list){out+='<ul>';list=true}out+='<li>'+esc(bullet[1])+'</li>';continue}
       if(list){out+='</ul>';list=false}
-      out+=(HEAD.test(l)&&l.length<60?'<h3>'+esc(l.replace(/:$/,''))+'</h3>':'<p>'+esc(l)+'</p>');
+      out+=((md||HEAD.test(l))&&l.length<80?'<h3>'+esc(l.replace(/:$/,''))+'</h3>':'<p>'+esc(l)+'</p>');
     }
     return out+(list?'</ul>':'');
   }
@@ -36,7 +36,7 @@ window.RecipeExports=(()=>{
     const lines=[{t:'La nostra cucina · Ricettario',b:1,s:20,color:[0.137,0.518,0.373],after:2},{t:r.length+(r.length===1?' ricetta':' ricette')+' · '+new Date().toLocaleDateString('it-IT'),s:9.5,color:[0.42,0.42,0.42],rule:true,after:6}];
     r.forEach((x,k)=>{
       lines.push({gap:k?14:4},{t:x.title,b:1,s:14,keep:80,color:[0.137,0.518,0.373],after:1},{t:x.category+(x.servings?' · '+x.servings+' persone':''),s:9,color:[0.42,0.42,0.42],rule:[0.78,0.78,0.78],ruleW:0.6,after:4});
-      clean(x.content).replace(/\n[ \t]*\n(?:[ \t]*\n)+/g,'\n\n').split('\n').forEach(t=>{const v=t.trim();if(!v){lines.push({gap:4});return}const head=/^(ingredienti|preparazione|procedimento|cottura|note|consigli|varianti|conservazione|timeline|finitura|risultato|impasto|condimento|farcitura|dosi|trucchi|tempi|porzioni|attrezzatura)\b/i.test(v)&&v.length<60;lines.push(head?{t:v,b:1,s:10.5,keep:40,after:1}:{t:v,s:10})});
+      String(x.content??'').replace(/\r/g,'').replace(/\n[ \t]*\n(?:[ \t]*\n)+/g,'\n\n').split('\n').forEach(t=>{const md=/^\s*#{1,6}\s+/.test(t),v=clean(t).trim(),bul=v.match(/^[-•*▪]\s+(.*)$/);if(!v){lines.push({gap:4});return}if(bul){lines.push({t:'• '+bul[1],s:10,x:8});return}const head=md||/^(ingredienti|preparazione|procedimento|cottura|note|consigli|varianti|conservazione|timeline|finitura|risultato|impasto|condimento|farcitura|dosi|trucchi|tempi|porzioni|attrezzatura)\b/i.test(v)&&v.length<60;lines.push(head?{t:v,b:1,s:10.5,keep:40,after:1}:{t:v,s:10})});
       if($('exportSources').checked&&x.notes)lines.push({t:'Note: '+x.notes,s:9,b:2,color:[0.3,0.3,0.3],after:2});
       if($('exportSources').checked)lines.push({t:'Fonte: '+(x.origin||'Archivio personale')+(x.sourceUrl?' · '+x.sourceUrl:''),s:8.5,color:[0.42,0.42,0.42],after:2});
     });

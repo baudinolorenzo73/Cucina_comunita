@@ -1,7 +1,7 @@
 'use strict';
 /* Installa / Aggiorna l'app (PWA) su Windows, Android, iOS e macOS. by Lollo ®2026 */
 (()=>{
- const VERSION='2.7.4',$=id=>document.getElementById(id);
+ const VERSION='2.9.1',$=id=>document.getElementById(id);
  const toast=m=>{const t=$('toast');if(!t||!$('toastText')){alert(m);return}$('toastText').textContent=m;if($('undoDelete'))$('undoDelete').hidden=true;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{t.hidden=true},7000)};
  const ua=navigator.userAgent,isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  const isAndroid=/Android/.test(ua),isWindows=/Windows/.test(ua),isMac=/Macintosh/.test(ua)&&!isIOS;

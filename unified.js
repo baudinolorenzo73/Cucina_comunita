@@ -3,33 +3,37 @@ window.CucinaUnita=(()=>{
  const KEYS=['lollo-ricettario-v1','ricettario-menu-calendar-v1','ricettario-community-shopping-v2','ricettario-shopping-v2','ricettario-appearance-v2','ricettario-theme','turni_offline_state_v1'];
  const $=id=>document.getElementById(id);
  let api,frameReady=false;
- const NOVEMBER_2026={
-  1:['ANA','ELENA'],2:['VALERIO','VALENTINA'],3:['ROBI','MAX',null,'DARIO'],4:['BRIAN','PAOLO'],5:['ELENA','ALESSANDRA','DARIO'],
-  6:['MONICA','VALERIO'],7:['THIERRY','DARIO'],8:['EDO','ELENA'],9:['PAOLO','ANA','DARIO'],10:['VALENTINA','MONICA'],
-  11:['VALERIO','EDO'],12:['THIERRY','ALESSANDRA'],13:['ROBI','ELENA'],14:['PAOLO','BRIAN'],15:['MAX','VALERIO'],
-  16:['ALESSANDRA','VALENTINA'],17:['BRIAN','EDO','DARIO'],18:['MONICA','THIERRY'],19:['EDO','ANA'],20:['VALERIO','MONICA'],
-  21:['ALESSANDRA','DARIO'],22:['VALENTINA','ROBI'],23:['DARIO','EDO'],24:['THIERRY','VALENTINA'],25:['MONICA','BRIAN'],
-  26:['MAX','VALERIO'],27:['EDO','ROBI'],28:['BRIAN','THIERRY'],29:['ELENA','MONICA'],30:['ANA','PAOLO']
- };
+ const PUBLISHED=()=>window.TURNI_PUBBLICATI?.mesi||{};
  const engine=()=>{try{return $('turniFrame')?.contentWindow?.CucinaTurniAPI}catch{return undefined}};
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function getMenu(date){return window.MenuCalendar.getDay(date)}
  function openMenu(date){api.openView('menu');window.MenuCalendar.selectDate(date)}
  function bundledAssignment(date){
-  if(!/^2026-11-\d{2}$/.test(date))return null;const row=NOVEMBER_2026[Number(date.slice(-2))];if(!row)return null;
-  return{archived:true,cucina:row[0],servizio:row[1],affCucina:row[2]||null,affServizio:row[3]||null};
+  const row=PUBLISHED()[date.slice(0,7)]?.[String(Number(date.slice(8,10)))];if(!row||!(row[0]||row[1]))return null;
+  return{archived:true,published:true,cucina:row[0]||'Da assegnare',servizio:row[1]||'Da assegnare',affCucina:row[2]||null,affServizio:row[3]||null};
  }
- function assignment(date){
-  let s=engine()?.snapshot();if(!s){try{s=JSON.parse(localStorage.getItem('turni_offline_state_v1'))}catch{return bundledAssignment(date)}}if(!s)return bundledAssignment(date);
+ function localAssignment(date){
+  let s=engine()?.snapshot();if(!s){try{s=JSON.parse(localStorage.getItem('turni_offline_state_v1'))}catch{return null}}if(!s)return null;
   const [y,m,g]=date.split('-').map(Number),current=s.anno===y&&s.mese===m;
-  const currentSpecial=current?s.giorniSpeciali?.find(x=>x.giorno===g):null;
-  const archived=s.storico?.[y+'-'+m];
-  const record=current&&(s.griglia||currentSpecial)?s:archived;if(!record)return bundledAssignment(date);
-  // Never present an invalidated generated plan as an assignment.
-  const d=record.griglia?.[g],special=record.giorniSpeciali?.find(x=>x.giorno===g);
-  if(!d&&!special)return bundledAssignment(date);
+  const currentSpecial=current?s.giorniSpeciali?.find(x=>x.giorno===g):null,archived=s.storico?.[y+'-'+m];
+  const record=current&&(s.griglia||currentSpecial)?s:archived;if(!record)return null;
+  const d=record.griglia?.[g],special=record.giorniSpeciali?.find(x=>x.giorno===g);if(!d&&!special)return null;
   return {archived:record!==s,cucina:special?special.cucina.join(', '):d.CUCINA||'Da assegnare',servizio:special?special.servizio.join(', '):d.SERVIZIO||'Da assegnare',affCucina:d?.affCucina,affServizio:d?.affServizio};
  }
+ /* Pubblicazione: crea il file turni-pubblicati.js con il mese scelto (dai turni di questo dispositivo) + i mesi già pubblicati. */
+ function publishTurns(month){
+  window.CucinaAccess.requireEdit();
+  if(!/^\d{4}-\d{2}$/.test(month||''))throw Error('Scegli il mese da pubblicare.');
+  const [y,mo]=month.split('-').map(Number),n=new Date(y,mo,0).getDate(),rows={};let found=0;
+  for(let g=1;g<=n;g++){const a=localAssignment(month+'-'+String(g).padStart(2,'0'));if(a){found++;rows[g]=[a.cucina||'',a.servizio||'',a.affCucina||'',a.affServizio||'']}}
+  if(!found)throw Error('Su questo dispositivo non ci sono turni generati per '+new Date(y,mo-1,1).toLocaleDateString('it-IT',{month:'long',year:'numeric'})+'. Generali prima nella scheda «Genera».');
+  const mesi={...PUBLISHED(),[month]:rows},keep=Object.keys(mesi).sort().slice(-24),data={aggiornato:new Date().toISOString(),mesi:Object.fromEntries(keep.map(k=>[k,mesi[k]]))};
+  api.download('turni-pubblicati.js','/* Turni pubblicati per tutti — file creato da «La nostra cucina» (pulsante «Pubblica i turni»). Non modificare a mano. by Lollo ®2026 */\nwindow.TURNI_PUBBLICATI='+JSON.stringify(data)+';\n','text/javascript');
+  window.TURNI_PUBBLICATI=data;return {found,n};
+ }
+ function publishedInfo(){const p=window.TURNI_PUBBLICATI;if(!p?.mesi)return 'Nessun turno pubblicato.';const ms=Object.keys(p.mesi).sort().map(k=>new Date(k+'-01T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'}));return 'Pubblicati: '+ms.join(', ')+' · aggiornato il '+new Date(p.aggiornato).toLocaleDateString('it-IT')}
+ function assignment(date){return localAssignment(date)||bundledAssignment(date)}
+
  function renderAssignment(date){
   const el=$('menuTurni');if(!el)return;el.dataset.date=date;const a=assignment(date);
   el.innerHTML='<h3>Turni cucina e servizio</h3>'+(a?.archived?'<p>Dal piano archiviato del mese.</p>':'')+(a?'<p><b>Cucina:</b> '+safe(a.cucina)+(a.affCucina?' · affiancamento '+safe(a.affCucina):'')+'</p><p><b>Servizio:</b> '+safe(a.servizio)+(a.affServizio?' · affiancamento '+safe(a.affServizio):'')+'</p>':'<p>Nessun turno salvato per questa data. Puoi generarlo o importare il backup della vecchia app.</p>')+'<button type="button" id="openTurniDate">Apri i turni del mese</button>';
@@ -116,23 +120,61 @@ window.CucinaUnita=(()=>{
  }
 
 
- function refresh(){renderPublicTurns();syncTheme();try{$('turniFrame').contentWindow?.aggiornaMenuCollegati?.()}catch{}}
+ function refresh(){renderMyTurns();renderPublicTurns();syncTheme();try{$('turniFrame').contentWindow?.aggiornaMenuCollegati?.()}catch{}}
 
  function renderPublicTurns(){
   const el=$('publicTurniTable'),month=$('publicTurniMonth')?.value;if(!el||!/^\d{4}-\d{2}$/.test(month||''))return;
   const [y,m]=month.split('-').map(Number),n=new Date(y,m,0).getDate();let rows='',found=false;
   for(let g=1;g<=n;g++){const date=month+'-'+String(g).padStart(2,'0'),a=assignment(date);if(a)found=true;rows+='<tr><th scope="row">'+g+'</th><td>'+safe(a?.cucina||'—')+(a?.affCucina?'<small>Affiancamento: '+safe(a.affCucina)+'</small>':'')+'</td><td>'+safe(a?.servizio||'—')+(a?.affServizio?'<small>Affiancamento: '+safe(a.affServizio)+'</small>':'')+'</td></tr>'}
+  if($('publicTurniInfo'))$('publicTurniInfo').textContent=publishedInfo();
   el.innerHTML=found?'<table class="public-turni-table"><thead><tr><th>Giorno</th><th>Cucina</th><th>Servizio</th></tr></thead><tbody>'+rows+'</tbody></table>':'<p>Nessun turno salvato per questo mese su questo dispositivo.</p>';
  }
+ /* I miei turni: elenco personale da oggi a fine mese prossimo + file .ics per il calendario del telefono. */
+ const MYKEY='cucina-mio-nome';
+ const myName=()=>{try{return localStorage.getItem(MYKEY)||''}catch{return ''}};
+ const isoDay=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ const splitNames=t=>String(t||'').split(/[,+]/).map(x=>x.replace(/\(.*?\)/g,'').trim()).filter(x=>x&&x!=='Da assegnare'&&x!=='—');
+ function myRange(){const out=[],d=new Date(),end=new Date(d.getFullYear(),d.getMonth()+2,0);d.setHours(12,0,0,0);for(;d<=end;d.setDate(d.getDate()+1))out.push(isoDay(d));return out}
+ function myTurns(name){const N=name.toUpperCase(),out=[];for(const date of myRange()){const a=assignment(date);if(!a)continue;const roles=[];
+   if(splitNames(a.cucina).some(x=>x.toUpperCase()===N))roles.push('Cucina');if(splitNames(a.affCucina).some(x=>x.toUpperCase()===N))roles.push('Affiancamento cucina');
+   if(splitNames(a.servizio).some(x=>x.toUpperCase()===N))roles.push('Servizio');if(splitNames(a.affServizio).some(x=>x.toUpperCase()===N))roles.push('Affiancamento servizio');
+   if(roles.length)out.push({date,roles,a})}return out}
+ function allNames(){const set=new Set();const months=new Set([...Object.keys(PUBLISHED()),...myRange().map(d=>d.slice(0,7))]);
+  for(const m of months){const [y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate();for(let g=1;g<=n;g++){const a=assignment(m+'-'+String(g).padStart(2,'0'));if(a)[a.cucina,a.servizio,a.affCucina,a.affServizio].forEach(t=>splitNames(t).forEach(x=>set.add(x.toUpperCase())))}}
+  return [...set].sort((a,b)=>a.localeCompare(b,'it'))}
+ function icsText(name,list){
+  const esc=t=>String(t).replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'),stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Lollo//La nostra cucina//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Turni cucina · '+esc(name)];
+  for(const t of list){const d=t.date.replace(/-/g,''),next=new Date(t.date+'T12:00:00');next.setDate(next.getDate()+1);
+   L.push('BEGIN:VEVENT','UID:turno-'+d+'-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'@la-nostra-cucina','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+isoDay(next).replace(/-/g,''),
+    'SUMMARY:'+esc('Turno '+t.roles.join(' + ').toLowerCase()+' · La nostra cucina'),'DESCRIPTION:'+esc('Cucina: '+t.a.cucina+(t.a.affCucina?' (aff. '+t.a.affCucina+')':'')+'\nServizio: '+t.a.servizio+(t.a.affServizio?' (aff. '+t.a.affServizio+')':'')),
+    'TRANSP:TRANSPARENT','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc('Domani turno '+t.roles.join(' + ').toLowerCase()),'TRIGGER:-PT6H','END:VALARM','END:VEVENT')}
+  L.push('END:VCALENDAR');return L.map(l=>l.length>74?l.match(/.{1,74}/g).join('\r\n '):l).join('\r\n')+'\r\n';
+ }
+ function renderMyTurns(){
+  const el=$('myTurns');if(!el)return;const names=allNames(),name=myName();
+  let h='<h2>👤 I miei turni</h2><div class="my-turns-row"><label>Il mio nome<select id="myNameSelect"><option value="">Scegli il tuo nome…</option>'+names.map(n=>'<option'+(n===name.toUpperCase()?' selected':'')+'>'+safe(n)+'</option>').join('')+'</select></label><button type="button" id="myIcs"'+(name?'':' disabled')+'>📅 Aggiungi al calendario del telefono</button></div>';
+  if(!name)h+='<p class="muted">Scegli il tuo nome: vedrai solo i tuoi turni da oggi a fine mese prossimo. Il nome resta salvato su questo dispositivo.</p>';
+  else{const list=myTurns(name),today=isoDay(new Date());
+   h+=list.length?'<ul class="my-turns-list">'+list.map(t=>{const dt=new Date(t.date+'T12:00:00'),we=dt.getDay()%6===0||!!festivo(t.date);return '<li class="'+(we?'we ':'')+(t.date===today?'today':'')+'"><span>'+safe(dt.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'}))+(t.date===today?' · oggi':'')+'</span><span>'+safe(t.roles.join(' + '))+'</span></li>'}).join('')+'</ul>':'<p>Nessun turno per '+safe(name)+' da oggi a fine mese prossimo.</p>';
+   h+='<p class="muted">Il calendario ti avvisa alle 18 del giorno prima. Se i turni cambiano, scarica di nuovo il file: i turni già aggiunti vengono aggiornati, non duplicati.</p>'}
+  el.innerHTML=h;
+  $('myNameSelect').onchange=e=>{try{localStorage.setItem(MYKEY,e.target.value)}catch{}renderMyTurns()};
+  $('myIcs').onclick=()=>{const n=myName();if(!n)return;const list=myTurns(n);if(!list.length){api.toast('Nessun turno da aggiungere.');return}api.download('Turni_'+n.replace(/[^A-Za-z0-9]+/g,'_')+'.ics',icsText(n,list),'text/calendar');api.toast(list.length+(list.length===1?' turno':' turni')+' nel file: aprilo per aggiungerli al calendario.')};
+ }
  function accessChanged(){
-  const editable=window.CucinaAccess?.canEdit(),frame=$('turniFrame');$('publicTurni').hidden=!!editable;frame.hidden=!editable;
+  renderMyTurns();const editable=window.CucinaAccess?.canEdit(),frame=$('turniFrame');$('publicTurni').hidden=!!editable;frame.hidden=!editable;
   if(editable){if(!frame.dataset.loaded){frame.dataset.loaded='yes';if(window.TURNI_DOCUMENT)frame.srcdoc=window.TURNI_DOCUMENT;else frame.src='./turni.html'}}
   else {frameReady=false;delete frame.dataset.loaded;frame.removeAttribute('srcdoc');frame.src='about:blank';renderPublicTurns()}
   window.MenuCalendar?.refresh();
  }
  function init(options){
   api=options;
-  if(/^https?:$/.test(location.protocol)&&window.TURNI_DOCUMENT)fetch('./turni.html').then(r=>r.ok?r.text():null).then(t=>{if(t&&t!==window.TURNI_DOCUMENT){console.warn('turni-doc.js non coincide con turni.html: lancia strumenti/aggiorna-turni-doc.py');if(window.CucinaAccess?.role()==='owner')api.toast('Attenzione Lorenzo: turni-doc.js è vecchio. Lancia strumenti/aggiorna-turni-doc.py e ripubblica.')}}).catch(()=>{});
+  if(/^https?:$/.test(location.protocol)&&window.TURNI_DOCUMENT&&window.CucinaAccess?.role()==='owner')fetch('./turni.html',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(t=>{if(t&&t!==window.TURNI_DOCUMENT){console.warn('turni-doc.js non coincide con turni.html: lancia strumenti/aggiorna-turni-doc.py');if(window.CucinaAccess?.role()==='owner')api.toast('Attenzione Lorenzo: turni-doc.js è vecchio. Lancia strumenti/aggiorna-turni-doc.py e ripubblica.')}}).catch(()=>{});
+  if($('publishMonth')){$('publishMonth').value=new Date().toISOString().slice(0,7);$('publishInfo').textContent=publishedInfo();
+   $('publishTurns').onclick=()=>{try{const m=$('publishMonth').value,r=publishTurns(m),label=new Date(m+'-01T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});$('publishInfo').textContent=publishedInfo();renderPublicTurns();
+    const d=document.createElement('dialog');d.innerHTML='<div class="dialog-top"><h2>Turni di '+safe(label)+' pronti</h2></div><p>Ho scaricato il file <b>turni-pubblicati.js</b> ('+r.found+' giorni su '+r.n+'). Per farli vedere a tutti:</p><ol><li>Prendi il file dai <b>Download</b>.</li><li>Mettilo nella cartella del progetto (es. <code>D:/Cucina comunita</code>) <b>al posto</b> di quello vecchio.</li><li>Ripubblica il progetto con <b>Pubblica</b>.</li></ol><p class="muted">Dopo pochi minuti chi apre l’app (anche già installata) vede i turni nuovi. I mesi pubblicati prima restano nel file.</p><div class="button-row"><button type="button" class="primary">Ho capito</button></div>';
+    document.body.append(d);d.querySelector('button').onclick=()=>d.close();d.addEventListener('close',()=>d.remove());d.showModal()}catch(e){api.toast(e.message)}};}
   if(window.CucinaDataGuard.issues().length){$('recoverBox').hidden=false;setTimeout(()=>api.toast('Alcuni dati non sono leggibili: apri ⚙ Impostazioni → Dati.'),1500)}
   $('recoverStorage').onclick=()=>{try{recoverStorage()}catch(e){api.toast(e.message)}};
   $('unifiedImportFile').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>30*1024*1024)throw Error('Il file supera 30 MB.');await importAll(JSON.parse(await f.text()))}catch(err){api.toast(err.message)}finally{e.target.value=''}};
@@ -142,8 +184,8 @@ window.CucinaUnita=(()=>{
   new MutationObserver(syncTheme).observe(document.body,{attributes:true,attributeFilter:['class','style']});
   $('publicTurniMonth').value=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
   $('publicTurniMonth').onchange=renderPublicTurns;
-  window.addEventListener('cucina-access-change',accessChanged);window.addEventListener('storage',()=>{renderPublicTurns();const date=$('menuTurni')?.dataset.date;if(date)renderAssignment(date)});accessChanged();
+  window.addEventListener('cucina-access-change',accessChanged);window.addEventListener('storage',()=>{renderMyTurns();renderPublicTurns();const date=$('menuTurni')?.dataset.date;if(date)renderAssignment(date)});accessChanged();
  }
- return{init,assignment,assignmentHTML,recoverStorage,getMenu,openMenu,renderAssignment,turnsChanged,turnsReady,exportAll,buildBackup,importAll,pickRestore,lastBackup,turniDocData,festivo,refresh};
+ return{init,assignment,assignmentHTML,recoverStorage,getMenu,openMenu,renderAssignment,turnsChanged,turnsReady,exportAll,buildBackup,publishTurns,publishedInfo,importAll,pickRestore,lastBackup,turniDocData,festivo,refresh};
 })();
 
