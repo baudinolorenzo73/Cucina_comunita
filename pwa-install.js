@@ -1,7 +1,7 @@
 'use strict';
 /* Installa / Aggiorna l'app (PWA) su Windows, Android, iOS e macOS. by Lollo ®2026 */
 (()=>{
- const VERSION='2.9.1',$=id=>document.getElementById(id);
+ const VERSION='2.10.2',$=id=>document.getElementById(id);
  const toast=m=>{const t=$('toast');if(!t||!$('toastText')){alert(m);return}$('toastText').textContent=m;if($('undoDelete'))$('undoDelete').hidden=true;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{t.hidden=true},7000)};
  const ua=navigator.userAgent,isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  const isAndroid=/Android/.test(ua),isWindows=/Windows/.test(ua),isMac=/Macintosh/.test(ua)&&!isIOS;
@@ -25,6 +25,29 @@
    toast('Backup salvato. Nel sito che si è aperto conferma l’importazione dei dati.');
   };
   d.querySelector('#pwaChangeUrl').onclick=()=>{const v=prompt('Indirizzo https del sito pubblicato:',onlineUrl());if(!v)return;try{const u=new URL(v);if(u.protocol!=='https:')throw Error();localStorage.setItem('cucina-online-url',u.href);d.querySelector('#pwaUrl').textContent=u.href}catch{toast('Indirizzo non valido: deve iniziare con https://')}};
+ }
+
+ const ASK_KEY='cucina-no-install-ask',ASKED='cucina-install-asked';
+ function remember(d){try{if(d.querySelector('#pwaChNever')?.checked)localStorage.setItem(ASK_KEY,'1')}catch{}}
+ function chooseDialog(){
+  showDialog('Dove vuoi installare l’app?','<p>Stai aprendo <b>La nostra cucina</b> dalla copia sul disco o sull’unità esterna: da qui non si può installare. Scegli dove vuoi usarla.</p><div class="install-choice"><button type="button" class="primary" id="pwaChPc">🖥 Su questo computer</button><button type="button" class="primary" id="pwaChAndroid">📱 Su un telefono o tablet Android</button></div><label class="install-never"><input type="checkbox" id="pwaChNever"> Non chiedermelo più quando apro da qui</label><p class="muted">Puoi riaprire questa scelta da ⚙ Impostazioni → «Apri online e installa». Chiudendo con ✕ continui a usare la copia sul disco.</p>');
+  const d=$('pwaDialog');
+  d.querySelector('#pwaChPc').onclick=()=>{remember(d);onlineDialog()};
+  d.querySelector('#pwaChAndroid').onclick=()=>{remember(d);androidDialog()};
+  d.addEventListener('close',()=>remember(d));
+ }
+ function androidDialog(){
+  const url=onlineUrl();
+  showDialog('Installare su Android','<ol><li>Sul telefono, <b>con internet</b>, apri <b>Chrome</b> e <b>inquadra questo QR</b> con la fotocamera (oppure scrivi l’indirizzo):<div id="pwaAQr" class="qr-box" hidden></div><code id="pwaAUrl" class="big-url"></code><button type="button" id="pwaACopy">Copia indirizzo</button></li><li>Tocca il menu <b>⋮</b> → <b>«Installa app»</b> (o «Aggiungi a schermata Home») → <b>Installa</b>.</li><li>Per portare <b>i tuoi dati</b>: premi <b>Salva backup dei dati</b> qui sotto, passa il file .json al telefono (cavo USB, Google Drive, e-mail, WhatsApp…) e nell’app installata usa <b>💾 Backup → Ripristina da file…</b> (serve l’accesso operatore).</li></ol><div class="button-row"><button type="button" class="primary" id="pwaABackup">💾 Salva backup dei dati</button><button type="button" id="pwaABack">← Indietro</button></div><p class="muted">I dati dell’app restano sul dispositivo: sul telefono l’app parte vuota finché non ripristini il backup.</p>');
+  const d=$('pwaDialog');d.querySelector('#pwaAUrl').textContent=url;
+  try{const q=d.querySelector('#pwaAQr');q.innerHTML=window.QRCode.svg(url,220);q.hidden=false}catch{}
+  d.querySelector('#pwaACopy').onclick=async()=>{
+   try{await navigator.clipboard.writeText(url);toast('Indirizzo copiato.');return}catch{}
+   const r=document.createRange();r.selectNodeContents(d.querySelector('#pwaAUrl'));const s=getSelection();s.removeAllRanges();s.addRange(r);
+   let ok=false;try{ok=document.execCommand('copy')}catch{}toast(ok?'Indirizzo copiato.':'Indirizzo selezionato: premi Ctrl+C per copiarlo.');
+  };
+  d.querySelector('#pwaABackup').onclick=()=>{try{window.CucinaUnita.exportAll();toast('Backup salvato nei Download.')}catch(e){toast(e.message)}};
+  d.querySelector('#pwaABack').onclick=chooseDialog;
  }
 
  function guide(){
@@ -74,7 +97,7 @@
     if(standalone()){toast('L’app è già aggiornata (versione '+VERSION+').');return}
     if(promptEvent){const ev=promptEvent;promptEvent=null;await ev.prompt();const r=await ev.userChoice.catch(()=>({}));toast(r.outcome==='accepted'?'Installazione avviata: cerca l’icona tra le tue app.':'Installazione annullata.');return}
     toast('Nessun aggiornamento: versione '+VERSION+'.');guide();
-   }else if(local)onlineDialog();else guide();
+   }else if(local)chooseDialog();else guide();
   }finally{btn.disabled=false;btn.textContent=label;status()}
  }
  async function repair(){
@@ -119,6 +142,7 @@
   if(b)b.onclick=()=>{try{sessionStorage.setItem('pwa-updating','1')}catch{}main()};
   if(r)r.onclick=repair;
   status();
+  try{if(local&&!standalone()&&!opener&&!sessionStorage.getItem(ASKED)&&!localStorage.getItem(ASK_KEY))setTimeout(()=>{if(document.querySelector('dialog[open]'))return;try{sessionStorage.setItem(ASKED,'1')}catch{}chooseDialog()},900)}catch{}
   if(fromLocal){history.replaceState(null,'',location.pathname+location.hash);try{sessionStorage.setItem('pwa-open-config','1')}catch{}}
   if(!(opener&&fromLocal))setTimeout(openConfig,600);
  }

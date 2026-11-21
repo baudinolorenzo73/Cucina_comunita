@@ -1,4 +1,4 @@
-# La nostra cucina — Ricettario, menù, turni e spesa · 2.9.1
+# La nostra cucina — Ricettario, menù, turni e spesa · 2.10.2
 
 by Lollo ®2026 · app web/PWA che funziona anche offline.
 
@@ -21,6 +21,26 @@ by Lollo ®2026 · app web/PWA che funziona anche offline.
 
 - Dopo ogni modifica a `turni.html` lancia `python strumenti/aggiorna-turni-doc.py`, poi ripubblica. Se ti dimentichi, da master compare un avviso.
 - Pubblica lo ZIP con Pubblica: `index.html`, `sw.js` e `manifest.webmanifest` stanno alla radice.
+
+## 2.10.2 — QR code per Android
+
+- Nella scelta «📱 Su Android» compare un **QR code** dell'indirizzo del sito: lo si inquadra con la fotocamera del telefono. Generato dal nuovo `qr.js` (nessuna libreria, funziona offline; verificato con un lettore QR su più lunghezze).
+
+## 2.10.1 — Installazione dalla copia su disco
+
+- Aprendo l'app da una cartella (per esempio la copia esportata sull'unità esterna, indirizzo `file://`) compare la scelta **«Dove vuoi installare l'app?»**: 🖥 su questo computer (salva il backup e apre il sito online per installare, con trasferimento dei dati) oppure 📱 su Android (indirizzo da aprire sul telefono, istruzioni e backup da portare con sé). Compare una volta per apertura; la casella «Non chiedermelo più» la spegne. Resta sempre raggiungibile da ⚙ Impostazioni.
+
+## 2.10.0 — Copia completa su unità esterna
+
+- ⚙ Impostazioni → **💽 Esporta tutto su unità esterna…**: scegli una cartella sulla chiavetta o sul disco; l'app controlla che si possa scrivere (prova di scrittura e rilettura), chiede conferma, e crea una cartella `La-nostra-cucina_data_ora` (programma + `dati/` con il database + `LEGGIMI-PRIMA.txt`) e lo stesso contenuto in uno ZIP. Poi rilegge e verifica ogni file. Non cancella né sovrascrive nulla (se qualcosa fallisce rimuove solo la copia incompleta che ha creato).
+- **Formattazione**: il browser non può formattare dischi. Se l'unità non è scrivibile o è nuova, la guida «Unità non formattata?» spiega come formattarla da Windows con le precauzioni.
+- Serve Chrome o Edge su computer, dal sito (o app installata): da `file://` il programma non si può leggere.
+- Nuovo file `external-export.js`.
+
+## 2.9.2 — Selezione sempre attiva e spostamento più facile
+
+- Ogni scheda ha la casella di selezione sempre visibile (niente pulsante da premere); con almeno una scelta compare la barra Stampa / PDF / Word / Excel. «Seleziona tutte» spunta le schede mostrate.
+- Spostare le schede: maniglia `⋮⋮` più grande, accanto alla casella, che trascina subito (su telefono senza dover tenere premuto); la pressione lunga sulla scheda resta, ma dura 0,35 s invece di 0,5 s. La grafica delle schede non cambia.
 
 ## 2.9.1 — Identità dell'app installata
 

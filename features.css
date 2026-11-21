@@ -294,5 +294,17 @@ h1 button.help-dot:hover,h1 button.help-dot:focus-visible,.help-dot:hover,.help-
 @media(max-width:740px){.help-dot,h1 button.help-dot{width:22px;height:22px;font-size:12px;margin-left:6px}#helpOpen{font-size:16px}}
 
 /* v2.9.0 — Selezione ricette per stampa ed esportazione. */
-.list-meta{flex-wrap:wrap;gap:8px 14px}.pick-toggle{font-size:12px;padding:6px 12px}.pick-btn{display:none;position:absolute;left:10px;top:10px;z-index:3;width:30px;height:30px;padding:0;border-radius:8px;border:2px solid var(--accent);background:var(--paper);color:var(--paper);font-weight:700;font-size:18px;line-height:1;align-items:center;justify-content:center}.pick-mode .pick-btn{display:inline-flex}.pick-btn.selected{background:var(--accent);color:#fff}.pick-mode .reorder-grip{display:none!important}.recipe-card.is-picked{outline:3px solid var(--accent);outline-offset:-3px}.pick-bar{position:sticky;bottom:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:18px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:var(--shadow)}.pick-bar[hidden]{display:none}.pick-actions{display:flex;flex-wrap:wrap;gap:6px}.pick-actions button{padding:7px 12px;font-size:13px}.pick-actions button:disabled{opacity:.45;cursor:default}@media print{.pick-bar,.pick-btn,.pick-toggle{display:none!important}}
-.pick-mode .recipe-order-hint{display:none}
+.list-meta{flex-wrap:wrap;gap:8px 14px}.pick-toggle{font-size:12px;padding:6px 12px}.pick-btn{display:inline-flex;position:absolute;left:10px;top:10px;z-index:3;width:30px;height:30px;padding:0;border-radius:8px;border:2px solid var(--accent);background:var(--paper);color:var(--paper);font-weight:700;font-size:18px;line-height:1;align-items:center;justify-content:center}.pick-btn.selected{background:var(--accent);color:#fff}.recipe-card.is-picked{outline:3px solid var(--accent);outline-offset:-3px}.pick-bar{position:sticky;bottom:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:18px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:var(--shadow)}.pick-bar[hidden]{display:none}.pick-actions{display:flex;flex-wrap:wrap;gap:6px}.pick-actions button{padding:7px 12px;font-size:13px}.pick-actions button:disabled{opacity:.45;cursor:default}@media print{.pick-bar,.pick-btn,.pick-toggle{display:none!important}}
+
+
+/* v2.9.2 — Maniglia di spostamento grande, accanto alla casella di selezione. */
+.recipe-grid.is-reorderable .reorder-grip{display:flex;align-items:center;justify-content:center;left:48px;top:10px;min-width:40px;height:30px;padding:0 8px;font-size:18px;letter-spacing:-4px;cursor:grab;touch-action:none;border:1px solid #243b3033;border-radius:8px}.recipe-grid.is-reorderable .reorder-grip:active{cursor:grabbing}
+
+/* v2.10.0 — Copia completa su unità esterna. */
+.ext-log{margin:12px 0;padding:10px 12px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--soft);font:12px/1.5 Consolas,monospace}.ext-log .ok{color:#257252;font-weight:700}.ext-log .bad{color:#b3261e;font-weight:700}.ext-guide{margin-top:10px}.ext-guide summary{cursor:pointer;font-weight:700}.ext-guide ol{padding-left:20px}
+
+/* v2.10.1 — Scelta dell'installazione quando si apre dalla copia su disco. */
+.install-choice{display:grid;gap:10px;margin:14px 0}.install-choice button{padding:14px;font-size:16px}.big-url{display:block;font-size:15px;word-break:break-all;padding:8px;margin:8px 0;background:var(--soft);border-radius:6px;user-select:all}.install-never{display:block;font-size:13px;margin:6px 0}
+
+/* v2.10.2 — QR code per l'installazione su Android. */
+.qr-box{margin:10px 0;text-align:center}.qr-box svg{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px}

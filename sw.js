@@ -1,8 +1,8 @@
 'use strict';
 const SCOPE=new URL(self.registration.scope);
 const PREFIX='lollo-ricettario:'+SCOPE.href+':';
-const CACHE=PREFIX+'v2.9.1';
-const FILES=['./access-config.js','./access.js','./index.html','./turni-doc.js','./turni-pubblicati.js','./actions-bar.js','./docgen.js','./pwa-install.js','./help.js','./data-guard.js','./unified.js','./app.js','./appearance.js','./shopping.js','./community-shopping.js','./menu-calendar.js','./exports.js','./recipe-select.js','./style.css','./features.css','./data.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'];
+const CACHE=PREFIX+'v2.10.2';
+const FILES=['./access-config.js','./access.js','./index.html','./turni-doc.js','./turni-pubblicati.js','./actions-bar.js','./docgen.js','./qr.js','./pwa-install.js','./help.js','./data-guard.js','./unified.js','./app.js','./appearance.js','./shopping.js','./community-shopping.js','./menu-calendar.js','./exports.js','./recipe-select.js','./external-export.js','./style.css','./features.css','./data.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'];
 const ASSETS=new Set(FILES.map(p=>new URL(p,SCOPE).href));
 self.addEventListener('message',event=>{if(event.data==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES))));

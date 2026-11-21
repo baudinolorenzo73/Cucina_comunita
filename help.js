@@ -20,8 +20,9 @@
   recipes:{t:'Le mie ricette',p:13,h:`
    <ul><li><b>Cerca</b> per nome o ingrediente, filtra per categoria, cambia l'ordine.</li>
    <li>Tocca una scheda per aprirla: <b>Modifica</b>, <b>Stampa / PDF</b>, <b>Chiedi all'AI</b>, <b>Duplica</b>, <b>Elimina</b>.</li>
+   <li><b>Spostare le schede</b>: trascina la maniglia <b>⋮⋮</b> in alto a sinistra (serve «Ordine personale», categoria «Tutte», senza ricerca). Su telefono funziona anche tenendo premuta la scheda un attimo.</li>
    <li>Il cuore ♡ aggiunge la ricetta alle <b>Preferite</b>.</li>
-   <li><b>☑ Seleziona ricette</b>: spunta le schede che vuoi, poi usa la barra in basso per <b>stampare</b> o esportare in <b>PDF, Word, Excel</b> solo quelle. Anche 🖨 e ⬇ in alto usano la selezione.</li>
+   <li>Ogni scheda ha la sua <b>casella</b> in alto a sinistra: spunta quelle che vuoi e compare la barra in basso per <b>stampare</b> o esportare in <b>PDF, Word, Excel</b> solo quelle. <b>☑ Seleziona tutte</b> spunta quelle mostrate. Anche 🖨 e ⬇ in alto usano la selezione.</li>
    <li><b>＋ Nuova ricetta</b>: titolo, categoria, persone, foto e testo.</li>
    <li>Tieni premuta una scheda e trascinala per cambiare l'ordine personale.</li></ul>
    <div class="help-tip">Nel testo scrivi i titoli di sezione con <code>## </code> (es. <code>## Ingredienti</code>) e gli ingredienti con <code>- </code>: stampe e PDF verranno ordinati.</div>`},

@@ -186,6 +186,6 @@ window.CucinaUnita=(()=>{
   $('publicTurniMonth').onchange=renderPublicTurns;
   window.addEventListener('cucina-access-change',accessChanged);window.addEventListener('storage',()=>{renderMyTurns();renderPublicTurns();const date=$('menuTurni')?.dataset.date;if(date)renderAssignment(date)});accessChanged();
  }
- return{init,assignment,assignmentHTML,recoverStorage,getMenu,openMenu,renderAssignment,turnsChanged,turnsReady,exportAll,buildBackup,publishTurns,publishedInfo,importAll,pickRestore,lastBackup,turniDocData,festivo,refresh};
+ return{init,assignment,assignmentHTML,recoverStorage,getMenu,openMenu,renderAssignment,turnsChanged,turnsReady,exportAll,buildBackup,markBackup:()=>{try{localStorage.setItem(LAST,new Date().toISOString())}catch{}window.dispatchEvent(new CustomEvent('cucina-backup-done'))},publishTurns,publishedInfo,importAll,pickRestore,lastBackup,turniDocData,festivo,refresh};
 })();
 
