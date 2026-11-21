@@ -87,7 +87,7 @@
   // pulsantino accanto al titolo di ogni sezione (rimesso al suo posto se l'app riscrive il titolo)
   const dot=(view,key)=>{const h=document.querySelector('#'+view+'View h1');if(!h||h.querySelector('.help-dot'))return h;
    const b=document.createElement('button');b.type='button';b.className='help-dot';b.textContent='?';b.title='Aiuto su questa sezione';b.setAttribute('aria-label','Aiuto: '+H[key].t);
-   b.onclick=e=>{e.stopPropagation();const act=document.querySelector('#nav button.active')?.dataset.view;open(view==='recipes'&&act==='favorites'?'favorites':key)};h.append(b);return h};
+   b.onclick=e=>{e.stopPropagation();open(view==='recipes'&&document.getElementById('favToggle')?.getAttribute('aria-pressed')==='true'?'favorites':key)};h.append(b);return h};
   for(const [view,key] of Object.entries(SECT)){const h=dot(view,key);if(h)new MutationObserver(()=>dot(view,key)).observe(h,{childList:true})}
  }
  window.CucinaHelp={open};

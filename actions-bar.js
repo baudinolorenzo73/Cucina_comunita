@@ -8,7 +8,7 @@
  const gen=(kind,get)=>()=>window.DocGen.save(kind,get());
  const trio=(get)=>[['PDF',gen('pdf',get)],['Word (.docx)',gen('docx',get)],['Excel (.xlsx)',gen('xlsx',get)]];
  const wa=get=>['📲 WhatsApp / Condividi',()=>window.DocGen.share(get())];
- function viewName(){const a=document.querySelector('#nav button.active');if(a)return a.dataset.view;const s=document.querySelector('main section[id$="View"]:not([hidden])');return s?s.id.replace(/View$/,''):'recipes'}
+ function viewName(){if(document.getElementById('favToggle')?.getAttribute('aria-pressed')==='true'&&!document.getElementById('recipesView').hidden)return 'favorites';const a=document.querySelector('#nav button.active');if(a)return a.dataset.view;const s=document.querySelector('main section[id$="View"]:not([hidden])');return s?s.id.replace(/View$/,''):'recipes'}
  function printSection(title){const s=$(viewName()+'View');const c=s.cloneNode(true);c.querySelectorAll('button,input,select,textarea,iframe,details,#sourcesList,[data-operator-only]').forEach(e=>e.remove());c.querySelectorAll('h2.section-title,h2.section-title+p,.page-kicker,.eyebrow').forEach(e=>e.remove());$('printContent').innerHTML='<div class="doc-print doc-page"><header><h1>'+title+'</h1><p>La nostra cucina</p></header>'+c.innerHTML+'<footer>La nostra cucina · by Lollo ®2026</footer></div>';$('printDialog').showModal()}
  function printPublicTurns(){window.DocGen.print(window.CucinaUnita.turniDocData($('publicTurniMonth')?.value))}
  function config(v){

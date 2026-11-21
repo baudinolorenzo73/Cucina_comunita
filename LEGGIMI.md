@@ -1,4 +1,4 @@
-# La nostra cucina — Ricettario, menù, turni e spesa · 2.10.2
+# La nostra cucina — Ricettario, menù, turni e spesa · 2.10.4
 
 by Lollo ®2026 · app web/PWA che funziona anche offline.
 
@@ -21,6 +21,14 @@ by Lollo ®2026 · app web/PWA che funziona anche offline.
 
 - Dopo ogni modifica a `turni.html` lancia `python strumenti/aggiorna-turni-doc.py`, poi ripubblica. Se ti dimentichi, da master compare un avviso.
 - Pubblica lo ZIP con Pubblica: `index.html`, `sw.js` e `manifest.webmanifest` stanno alla radice.
+
+## 2.10.4 — Menu colorato
+
+- Ogni voce del menu laterale ha un colore proprio (ricette arancio, menù verde, turni blu, spesa comunità ocra, spesa AI turchese, web viola, assistente rosa, dedica rosso, fonti grigio); la voce aperta si riempie del colore.
+
+## 2.10.3 — Preferite
+
+- La voce «Preferite» non è più nel menu laterale: in «Le mie ricette» c'è il pulsante **♡ Preferite** che mostra solo le preferite (si ripreme per tornare a tutte). Stampa ed esporta usano le preferite quando il filtro è attivo.
 
 ## 2.10.2 — QR code per Android
 

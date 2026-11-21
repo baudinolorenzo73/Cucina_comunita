@@ -308,3 +308,22 @@ h1 button.help-dot:hover,h1 button.help-dot:focus-visible,.help-dot:hover,.help-
 
 /* v2.10.2 — QR code per l'installazione su Android. */
 .qr-box{margin:10px 0;text-align:center}.qr-box svg{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+
+/* v2.10.3 — filtro Preferite dentro Le mie ricette. */
+#favToggle.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* v2.10.4 — ogni voce del menu ha un colore proprio, riconoscibile a colpo d'occhio. */
+#nav button{--nc:#888;border-left:6px solid var(--nc);background:color-mix(in srgb,var(--nc) 14%,var(--paper));font-weight:700}
+#nav button:hover{background:color-mix(in srgb,var(--nc) 26%,var(--paper))}
+#nav button.active{background:var(--nc);color:#fff;border-color:var(--nc)}
+#nav button.active *{color:#fff}
+#nav [data-view=recipes]{--nc:#c2410c}
+#nav [data-view=menu]{--nc:#15803d}
+#nav [data-view=turni]{--nc:#1d4ed8}
+#nav [data-view=community]{--nc:#a16207}
+#nav [data-view=shopping]{--nc:#0e7490}
+#nav [data-view=explore]{--nc:#7e22ce}
+#nav [data-view=ai]{--nc:#be185d}
+#nav [data-view=dedication]{--nc:#b91c1c}
+#nav [data-view=sources]{--nc:#475569}
+@media(max-width:1000px){#nav button{border-left-width:4px}}

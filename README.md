@@ -1,4 +1,4 @@
-# La nostra cucina — Ricettario, menù, turni e spesa · 2.10.2
+# La nostra cucina — Ricettario, menù, turni e spesa · 2.10.4
 
 by Lollo ®2026 · app web/PWA che funziona anche offline.
 
